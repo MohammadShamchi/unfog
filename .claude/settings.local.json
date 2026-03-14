@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun:*)",
+      "Bash(npx:*)",
+      "WebSearch",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:www.fontshare.com)",
+      "WebFetch(domain:api.fontshare.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git init:*)",
+      "Bash(cd:*)",
+      "Bash(cp:*)",
+      "Bash(bunx:*)"
+    ]
+  }
+}
