@@ -106,7 +106,7 @@ export function IntakeQuestions({
           transition={{ delay: qi * 0.1 + 0.1 }}
           className="flex flex-col gap-2"
         >
-          <p className="text-xs font-body text-text-primary font-medium">
+          <p dir="auto" className="text-xs font-body text-text-primary font-medium">
             {q.question}
           </p>
 
@@ -132,7 +132,7 @@ export function IntakeQuestions({
                   }}
                 >
                   {isSelected && <Check size={12} />}
-                  {opt}
+                  <span dir="auto">{opt}</span>
                 </button>
               );
             })}
@@ -153,6 +153,7 @@ export function IntakeQuestions({
                   </button>
                 ) : (
                   <Textarea
+                    dir="auto"
                     autoFocus
                     placeholder="Type your answer..."
                     value={selections[q.id]?.custom || ""}

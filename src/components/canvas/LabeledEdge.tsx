@@ -102,9 +102,10 @@ export function LabeledEdge({
           {editing ? (
             <input
               ref={inputRef}
+              dir="auto"
               className="rounded px-1.5 py-0.5 font-body outline-none"
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 backgroundColor: "var(--bg-elevated)",
                 border: "1px solid var(--accent)",
                 color: "var(--text-primary)",
@@ -121,12 +122,13 @@ export function LabeledEdge({
             />
           ) : labelText ? (
             <span
-              className="rounded px-1.5 py-0.5 font-body cursor-default"
+              dir="auto"
+              className="rounded-sm px-1.5 py-0.5 font-body cursor-default"
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 color: "var(--text-secondary)",
                 backgroundColor: "var(--bg-surface)",
-                opacity: 0.8,
+                border: "1px solid var(--border)",
               }}
             >
               {labelText}

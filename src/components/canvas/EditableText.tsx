@@ -56,6 +56,7 @@ export function EditableText({
   if (!editing) {
     return (
       <p
+        dir="auto"
         className={`cursor-text ${className}`}
         onDoubleClick={(e) => {
           e.stopPropagation();
@@ -83,6 +84,7 @@ export function EditableText({
         commit();
       }
     },
+    dir: "auto" as const,
     className: `w-full bg-transparent border-0 outline-none p-0 ${className}`,
     style: {
       borderBottom: "1px solid var(--accent)",

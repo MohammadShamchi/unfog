@@ -66,7 +66,7 @@
   --node-glow-spread: 16px;
 
   /* Dot Grid */
-  --dot-color: rgba(255, 255, 255, 0.05);
+  --dot-color: rgba(255, 255, 255, 0.07);
   --dot-size: 1px;
   --dot-gap: 24px;
 

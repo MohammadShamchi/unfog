@@ -62,7 +62,7 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
 
   return (
     <motion.div
-      className="group relative min-w-[200px] max-w-[280px] rounded-xl px-3 py-2.5"
+      className="group relative min-w-[200px] max-w-[280px] rounded-xl px-4 py-3"
       style={{
         backgroundColor: "var(--bg-elevated)",
         borderWidth: "2px 1px 1px 1px",
@@ -98,7 +98,7 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
       </div>
 
       {/* Type badge */}
-      <div className="mb-1.5">
+      <div className="mb-2">
         <TypeBadge nodeType={data.nodeType} onChange={onTypeChange} />
       </div>
 
@@ -118,7 +118,7 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
         onEditStart={handleEditStart}
         onEditEnd={handleEditEnd}
         multiline
-        className="mt-1 font-body text-xs text-text-secondary line-clamp-2"
+        className="mt-1.5 font-body text-xs text-text-secondary leading-relaxed line-clamp-2"
       />
 
       <Handle type="source" position={Position.Bottom} className="!bg-border" />

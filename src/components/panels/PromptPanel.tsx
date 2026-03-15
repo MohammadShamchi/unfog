@@ -106,6 +106,7 @@ export function PromptPanelContent() {
         </div>
 
         <Textarea
+          dir="auto"
           placeholder="I run a software company. Sales are bad, HR is a mess, and we're not shipping fast enough..."
           className="min-h-[140px] resize-none border-border bg-elevated text-text-primary placeholder:text-text-muted font-body text-sm focus:border-accent focus:ring-1 focus:ring-accent-glow"
           style={{
@@ -122,17 +123,18 @@ export function PromptPanelContent() {
         />
 
         <Button
-          className="w-full gap-2 font-display text-sm font-semibold"
+          className="w-full gap-2 font-display text-sm font-semibold transition-opacity"
           style={{
             backgroundColor: "var(--accent)",
             color: "var(--bg-canvas)",
             borderRadius: "var(--radius-sm)",
+            opacity: isLoading || intakeStatus === "assessing" ? 0.7 : 1,
           }}
           disabled={!prompt.trim() || isLoading || intakeStatus === "assessing" || intakeStatus === "asking" || intakeStatus === "answering"}
           onClick={() => handleSubmit()}
         >
           {isLoading || intakeStatus === "assessing" ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-          {isLoading || intakeStatus === "assessing" ? "Analyzing..." : "Unfog this"}
+          {isLoading || intakeStatus === "assessing" ? "Thinking..." : "Unfog this"}
         </Button>
       </div>
 
@@ -140,13 +142,13 @@ export function PromptPanelContent() {
       {summary && nodes.length > 0 && (
         <div className="px-5 pb-4">
           <div
-            className="rounded-md p-3"
+            className="rounded-md px-3 py-3.5"
             style={{ backgroundColor: "var(--accent-muted)" }}
           >
             <p className="text-xs font-semibold font-display" style={{ color: "var(--accent)" }}>
               Summary
             </p>
-            <p className="mt-1 text-xs font-body text-text-secondary">
+            <p dir="auto" className="mt-1 text-sm font-body text-text-secondary leading-relaxed line-clamp-3">
               {summary}
             </p>
           </div>
@@ -253,8 +255,8 @@ export function PromptPanelContent() {
                   handleSubmit(entry.prompt);
                 }}
               >
-                <p className="font-body text-xs text-text-primary line-clamp-2 pr-5">
-                  {entry.prompt}
+                <p dir="auto" className="font-body text-xs text-text-primary line-clamp-2 pr-5">
+                  {entry.summary || entry.prompt}
                 </p>
                 <div className="mt-1 flex items-center gap-2 text-[10px] text-text-muted font-body">
                   <span>{formatRelativeTime(entry.timestamp)}</span>

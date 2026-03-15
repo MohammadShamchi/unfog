@@ -152,16 +152,19 @@ function CanvasInner() {
       >
         <DotGridBackground />
         <Controls position="bottom-right" showInteractive={false} />
-        <MiniMap
-          position="bottom-left"
-          nodeColor={miniMapNodeColor}
-          maskColor="rgba(14, 16, 19, 0.8)"
-          style={{
-            backgroundColor: "var(--bg-surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-md)",
-          }}
-        />
+        {nodes.length >= 10 && (
+          <MiniMap
+            position="bottom-left"
+            nodeColor={miniMapNodeColor}
+            maskColor="rgba(14, 16, 19, 0.8)"
+            style={{
+              backgroundColor: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-md)",
+              opacity: 0.6,
+            }}
+          />
+        )}
       </ReactFlow>
 
       <ThinkingOverlay />
@@ -186,9 +189,9 @@ function CanvasInner() {
       {/* Add node button — hidden when no map */}
       {(nodes.length > 0 || isLoading) && (
         <button
-          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-colors hover:text-text-primary"
+          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-all opacity-60 hover:opacity-100 hover:text-text-primary"
           style={{
-            backgroundColor: "var(--bg-surface)",
+            backgroundColor: "transparent",
             borderColor: "var(--border)",
             color: "var(--text-secondary)",
           }}
