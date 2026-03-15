@@ -28,7 +28,9 @@
       "WebFetch(domain:platform.openai.com)",
       "WebFetch(domain:ai.google.dev)",
       "Bash(grep:*)",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)"
     ]
   }
 }
