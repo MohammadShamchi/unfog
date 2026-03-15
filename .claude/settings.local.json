@@ -26,7 +26,9 @@
       "Bash(find:*)",
       "WebFetch(domain:openrouter.ai)",
       "WebFetch(domain:platform.openai.com)",
-      "WebFetch(domain:ai.google.dev)"
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(grep:*)",
+      "Bash(npm search:*)"
     ]
   }
 }

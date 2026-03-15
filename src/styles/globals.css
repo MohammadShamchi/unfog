@@ -1,5 +1,6 @@
 @import url("https://api.fontshare.com/v2/css?f[]=satoshi@1&display=swap");
 @import url("https://api.fontshare.com/v2/css?f[]=general-sans@1&display=swap");
+@import "@fontsource-variable/vazirmatn";
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -203,10 +204,10 @@
   --radius-4xl: 30px;
 
   /* Fonts */
-  --font-display: "Satoshi", system-ui, sans-serif;
-  --font-body: "General Sans", system-ui, sans-serif;
+  --font-display: "Satoshi", "Vazirmatn Variable", system-ui, sans-serif;
+  --font-body: "General Sans", "Vazirmatn Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", "Fira Code", monospace;
-  --font-sans: "General Sans", system-ui, sans-serif;
+  --font-sans: "General Sans", "Vazirmatn Variable", system-ui, sans-serif;
 
   /* Spacing */
   --spacing-sidebar: 320px;
