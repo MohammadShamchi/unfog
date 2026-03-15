@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "./Header";
 import { PromptPanel, PromptPanelContent } from "../panels/PromptPanel";
 import { MobilePromptDrawer } from "../panels/MobilePromptDrawer";
 import { ProblemCanvas } from "../canvas/ProblemCanvas";
 import { ShortcutsModal } from "../ui/shortcuts-modal";
 import { useSoundStore } from "@/stores/sound-store";
+import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
 import { useIsMobile } from "@/hooks/use-media-query";
@@ -44,6 +46,10 @@ export function EditorLayout() {
   // Keyboard shortcuts
   useKeyboardShortcuts(() => setShowShortcuts(true));
 
+  const nodes = useCanvasStore((s) => s.nodes);
+  const isLoading = useCanvasStore((s) => s.isLoading);
+  const hasActiveMap = nodes.length > 0 || isLoading;
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">
       <Header
@@ -51,7 +57,20 @@ export function EditorLayout() {
         onTogglePrompt={() => setDrawerOpen((v) => !v)}
       />
       <div className="flex flex-1 overflow-hidden">
-        {!isMobile && <PromptPanel />}
+        <AnimatePresence>
+          {!isMobile && hasActiveMap && (
+            <motion.div
+              key="sidebar"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 320, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden flex-shrink-0"
+            >
+              <PromptPanel />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <main className="relative flex-1">
           <ProblemCanvas />
         </main>

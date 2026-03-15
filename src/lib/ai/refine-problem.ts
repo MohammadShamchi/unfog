@@ -132,7 +132,7 @@ Analyze the current state and suggest improvements.`;
     config: {
       systemInstruction: REFINE_SYSTEM_PROMPT,
       temperature: parseFloat(process.env.AI_TEMPERATURE || "0.3"),
-      maxOutputTokens: parseInt(process.env.AI_MAX_TOKENS || "4096"),
+      maxOutputTokens: 4096,
       responseMimeType: "application/json",
       responseSchema: refineSchema,
     },

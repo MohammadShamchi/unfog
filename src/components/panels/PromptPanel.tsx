@@ -35,38 +35,12 @@ export function PromptPanelContent() {
   const intakeStatus = useIntakeStore((s) => s.status);
   const intakeRounds = useIntakeStore((s) => s.rounds);
 
-  const { generateMap } = useIntakeHandler();
+  const { generateMap, submitPrompt } = useIntakeHandler();
 
-  async function handleSubmit(overridePrompt?: string) {
+  function handleSubmit(overridePrompt?: string) {
     const text = overridePrompt ?? prompt;
     if (!text.trim() || isLoading) return;
-
-    const intakeStore = useIntakeStore.getState();
-    intakeStore.reset();
-    intakeStore.setActivePrompt(text.trim());
-    intakeStore.startAssessment();
-
-    try {
-      const assessRes = await fetchWithRetry("/api/assess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text.trim() }),
-      });
-      const assessData = await assessRes.json();
-
-      if (assessData.success && !assessData.data.sufficient && assessData.data.questions?.length) {
-        intakeStore.setQuestions(assessData.data.questions);
-        return;
-      }
-
-      intakeStore.setGenerating();
-      await generateMap(text.trim());
-      intakeStore.reset();
-    } catch {
-      intakeStore.setGenerating();
-      await generateMap(text.trim());
-      intakeStore.reset();
-    }
+    submitPrompt(text);
   }
 
   async function handleRefine() {

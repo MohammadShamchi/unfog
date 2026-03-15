@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { DotGridBackground } from "./DotGridBackground";
 import { ThinkingOverlay } from "./ThinkingOverlay";
-import { EmptyState } from "./EmptyState";
+import { CenteredPromptOverlay } from "./CenteredPromptOverlay";
 import { SkeletonNodes } from "./SkeletonNodes";
 import { IntakeOverlay } from "./IntakeOverlay";
 import { LabeledEdge } from "./LabeledEdge";
@@ -160,15 +160,7 @@ function CanvasInner() {
       <AnimatePresence mode="wait">
         {showIntake && <IntakeOverlay key="intake" />}
         {!showIntake && nodes.length === 0 && !isLoading && (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="contents"
-          >
-            <EmptyState />
-          </motion.div>
+          <CenteredPromptOverlay key="prompt" />
         )}
         {isLoading && nodes.length === 0 && (
           <motion.div
@@ -183,19 +175,21 @@ function CanvasInner() {
         )}
       </AnimatePresence>
 
-      {/* Add node button */}
-      <button
-        className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-colors hover:text-text-primary"
-        style={{
-          backgroundColor: "var(--bg-surface)",
-          borderColor: "var(--border)",
-          color: "var(--text-secondary)",
-        }}
-        onClick={handleAddNode}
-      >
-        <Plus size={14} />
-        Add node
-      </button>
+      {/* Add node button — hidden when no map */}
+      {(nodes.length > 0 || isLoading) && (
+        <button
+          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-colors hover:text-text-primary"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            borderColor: "var(--border)",
+            color: "var(--text-secondary)",
+          }}
+          onClick={handleAddNode}
+        >
+          <Plus size={14} />
+          Add node
+        </button>
+      )}
     </div>
   );
 }

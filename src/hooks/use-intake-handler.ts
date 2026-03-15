@@ -85,5 +85,35 @@ export function useIntakeHandler() {
     }
   }, [generateMap]);
 
-  return { generateMap, handleIntakeAnswers };
+  const submitPrompt = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    const intakeStore = useIntakeStore.getState();
+    intakeStore.reset();
+    intakeStore.setActivePrompt(text.trim());
+    intakeStore.startAssessment();
+
+    try {
+      const assessRes = await fetchWithRetry("/api/assess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: text.trim() }),
+      });
+      const assessData = await assessRes.json();
+
+      if (assessData.success && !assessData.data.sufficient && assessData.data.questions?.length) {
+        intakeStore.setQuestions(assessData.data.questions);
+        return;
+      }
+
+      intakeStore.setGenerating();
+      await generateMap(text.trim());
+      intakeStore.reset();
+    } catch {
+      intakeStore.setGenerating();
+      await generateMap(text.trim());
+      intakeStore.reset();
+    }
+  }, [generateMap]);
+
+  return { generateMap, handleIntakeAnswers, submitPrompt };
 }
