@@ -151,7 +151,9 @@ Vercel (free tier). AI API keys are server-side only (env vars) or sent per-requ
 
 ## Spec Files
 
-The project follows spec-driven development. Remaining spec files in the repo root:
-- `01_canvas_setup_SPEC.md` — Canvas, layout, fonts, design tokens, React Flow setup
-- `01.5_ai_engine_config_SPEC.md` — Multi-provider AI configuration
-- `12_guided_intake_SPEC.md` — Multi-round intake questioning flow
+The project follows spec-driven development. Spec files live in `docs/`:
+- `docs/01_canvas_setup_SPEC.md` — Canvas, layout, fonts, design tokens, React Flow setup
+- `docs/01.5_ai_engine_config_SPEC.md` — Multi-provider AI configuration
+- `docs/12_guided_intake_SPEC.md` — Multi-round intake questioning flow
+- `docs/specs_14_to_17_living_canvas.md` — Living canvas specs
+- `docs/UNFOG_PRD.md` — Product requirements document
