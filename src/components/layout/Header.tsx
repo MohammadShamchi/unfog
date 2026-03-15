@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare } from "lucide-react";
+import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSoundStore } from "@/stores/sound-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
 import { exportCanvas, importCanvas, downloadAsJSON } from "@/lib/export/canvas-export";
+import { soundEngine } from "@/lib/sound/sound-engine";
 
 interface HeaderProps {
   isMobile?: boolean;
@@ -19,6 +20,7 @@ export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
   const soundInit = useSoundStore((s) => s.init);
   const soundToggle = useSoundStore((s) => s.toggle);
   const nodes = useCanvasStore((s) => s.nodes);
+  const isFogged = useCanvasStore((s) => s.isFogged);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSoundToggle() {
@@ -134,6 +136,22 @@ export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
             className="hidden"
             onChange={handleImport}
           />
+
+          {nodes.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger
+                className="rounded-sm p-1.5 text-text-secondary transition-colors duration-[120ms] hover:bg-hover hover:text-text-primary"
+                aria-label={isFogged ? "Clear fog" : "Show fog"}
+                onClick={() => {
+                  useCanvasStore.getState().toggleFog();
+                  soundEngine.playFogToggle();
+                }}
+              >
+                {isFogged ? <CloudOff size={16} /> : <Cloud size={16} />}
+              </TooltipTrigger>
+              <TooltipContent>{isFogged ? "Clear fog" : "Show fog"}</TooltipContent>
+            </Tooltip>
+          )}
 
           <div className="mx-1 h-4 w-px" style={{ backgroundColor: "var(--border)" }} />
 

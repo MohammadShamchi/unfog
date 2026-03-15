@@ -60,6 +60,11 @@
   --duration-slow: 500ms;
   --duration-breath: 800ms;
 
+  /* Fog */
+  --fog-opacity: 0.42;
+  --fog-reveal-duration: 180ms;
+  --node-glow-spread: 16px;
+
   /* Dot Grid */
   --dot-color: rgba(255, 255, 255, 0.05);
   --dot-size: 1px;

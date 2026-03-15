@@ -8,6 +8,8 @@ interface EditableTextProps {
   multiline?: boolean;
   className?: string;
   placeholder?: string;
+  onEditStart?: () => void;
+  onEditEnd?: () => void;
 }
 
 export function EditableText({
@@ -16,6 +18,8 @@ export function EditableText({
   multiline = false,
   className = "",
   placeholder = "",
+  onEditStart,
+  onEditEnd,
 }: EditableTextProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -40,12 +44,14 @@ export function EditableText({
       setDraft(value);
     }
     setEditing(false);
-  }, [draft, value, onCommit]);
+    onEditEnd?.();
+  }, [draft, value, onCommit, onEditEnd]);
 
   const cancel = useCallback(() => {
     setDraft(value);
     setEditing(false);
-  }, [value]);
+    onEditEnd?.();
+  }, [value, onEditEnd]);
 
   if (!editing) {
     return (
@@ -54,6 +60,7 @@ export function EditableText({
         onDoubleClick={(e) => {
           e.stopPropagation();
           setEditing(true);
+          onEditStart?.();
         }}
       >
         {value || placeholder}

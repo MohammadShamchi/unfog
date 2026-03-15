@@ -27,6 +27,7 @@ interface CanvasState {
   editHistory: EditEvent[];
   isRefining: boolean;
   isLoading: boolean;
+  isFogged: boolean;
   _fitViewTrigger: number;
 
   // Core
@@ -49,6 +50,9 @@ interface CanvasState {
   // Refinement
   setRefining: (v: boolean) => void;
   applyRefinement: (response: RefineResponse) => void;
+
+  // Fog
+  toggleFog: () => void;
 
   // Import / Reset
   importAnalysis: (data: {
@@ -73,6 +77,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   editHistory: [],
   isRefining: false,
   isLoading: false,
+  isFogged: false,
   _fitViewTrigger: 0,
 
   setAnalysis: (analysis, prompt) => {
@@ -84,6 +89,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       originalPrompt: prompt,
       editHistory: [],
       isLoading: false,
+      isFogged: true,
       _fitViewTrigger: state._fitViewTrigger + 1,
     }));
   },
@@ -353,9 +359,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       summary: response.summary || state.summary,
       editHistory: [],
       isRefining: false,
+      isFogged: true,
       _fitViewTrigger: s._fitViewTrigger + 1,
     }));
   },
+
+  toggleFog: () => set((s) => ({ isFogged: !s.isFogged })),
 
   importAnalysis: (data) => {
     useUndoStore.getState().clear();
@@ -365,6 +374,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       summary: data.summary,
       originalPrompt: data.prompt,
       editHistory: [],
+      isFogged: false,
     });
   },
 
@@ -379,6 +389,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       editHistory: [],
       isRefining: false,
       isLoading: false,
+      isFogged: false,
     });
   },
 

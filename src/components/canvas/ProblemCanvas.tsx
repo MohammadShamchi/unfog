@@ -34,6 +34,7 @@ function CanvasInner() {
   const { nodes, edges, onNodesChange, onEdgesChange } = useCanvasStore();
   const fitViewTrigger = useCanvasStore((s) => s._fitViewTrigger);
   const isLoading = useCanvasStore((s) => s.isLoading);
+  const isFogged = useCanvasStore((s) => s.isFogged);
   const { fitView, screenToFlowPosition } = useReactFlow();
 
   const intakeStatus = useIntakeStore((s) => s.status);
@@ -106,18 +107,25 @@ function CanvasInner() {
   const defaultEdgeOpts = useMemo(
     () => ({
       type: "smoothstep" as const,
-      style: { stroke: "var(--border)", strokeWidth: 1.5 },
+      style: {
+        stroke: "var(--border)",
+        strokeWidth: 1.5,
+        opacity: isFogged ? 0.3 : 1,
+        transition: "opacity 0.4s",
+      },
       labelStyle: {
         fill: "var(--text-secondary)",
         fontSize: 11,
         fontFamily: "var(--font-body)",
+        opacity: isFogged ? 0.3 : 1,
+        transition: "opacity 0.4s",
       },
       labelBgStyle: {
         fill: "var(--bg-surface)",
         fillOpacity: 0.8,
       },
     }),
-    [],
+    [isFogged],
   );
 
   return (

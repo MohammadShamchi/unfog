@@ -92,6 +92,21 @@ export const soundEngine = {
     setTimeout(() => synth.dispose(), 300);
   },
 
+  playFogToggle() {
+    if (!isReady()) return;
+    const filter = new Tone.Filter(800, "lowpass").toDestination();
+    const synth = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.02, decay: 0.1, sustain: 0, release: 0.04 },
+    }).connect(filter);
+    filter.frequency.rampTo(2000, 0.15);
+    synth.triggerAttackRelease("A3", "150ms");
+    setTimeout(() => {
+      synth.dispose();
+      filter.dispose();
+    }, 300);
+  },
+
   playUndo() {
     if (!isReady()) return;
     const synth = new Tone.Synth({
