@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef } from "react";
-import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff } from "lucide-react";
+import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff, X } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSoundStore } from "@/stores/sound-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
+import { useFocusStore } from "@/stores/focus-store";
 import { exportCanvas, importCanvas, downloadAsJSON } from "@/lib/export/canvas-export";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
@@ -21,6 +22,8 @@ export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
   const soundToggle = useSoundStore((s) => s.toggle);
   const nodes = useCanvasStore((s) => s.nodes);
   const isFogged = useCanvasStore((s) => s.isFogged);
+  const focusedNodeId = useFocusStore((s) => s.focusedNodeId);
+  const focusedNode = nodes.find((n) => n.id === focusedNodeId);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSoundToggle() {
@@ -91,6 +94,27 @@ export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
           <span className="text-xs font-body text-text-muted">v0.1</span>
         )}
       </div>
+
+      {/* Spec 17: Focus indicator pill */}
+      {focusedNodeId && focusedNode && (
+        <div
+          className="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-display text-xs font-semibold"
+          style={{
+            backgroundColor: "var(--accent-muted)",
+            color: "var(--accent)",
+          }}
+        >
+          <span className="truncate max-w-[120px]" dir="auto">
+            Focused: {focusedNode.data.label}
+          </span>
+          <button
+            className="rounded-sm p-0.5 hover:bg-accent/20 transition-colors"
+            onClick={() => useFocusStore.getState().exitFocus()}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
 
       {/* Right controls */}
       <TooltipProvider delay={300}>

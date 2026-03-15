@@ -5,11 +5,23 @@ import {
   type NodeChange,
   type EdgeChange,
 } from "@xyflow/react";
-import type { AnalysisResponse, RefineResponse } from "@/types/analysis";
+import type { AnalysisResponse, RefineResponse, ChatOperations, AnalysisNode, AnalysisEdge } from "@/types/analysis";
 import type { NodeType } from "@/types/analysis";
 import type { InsightNode, InsightEdge, InsightNodeData, EditEvent } from "@/types/canvas";
 import { layoutAnalysis, layoutNewNodes } from "@/lib/layout/dagre-layout";
 import { useUndoStore } from "./undo-store";
+
+// Lazy accessors to avoid circular dependency issues at module load time
+// These stores import canvas-store, so we access them only when called
+function getChatStore() {
+  return import("./chat-store").then((m) => m.useChatStore);
+}
+function getGhostStore() {
+  return import("./ghost-store").then((m) => m.useGhostStore);
+}
+function getFocusStore() {
+  return import("./focus-store").then((m) => m.useFocusStore);
+}
 
 function snapshot() {
   const { nodes, edges } = useCanvasStore.getState();
@@ -29,11 +41,15 @@ interface CanvasState {
   isLoading: boolean;
   isFogged: boolean;
   _fitViewTrigger: number;
+  selectedNodeId: string | null;
 
   // Core
   setAnalysis: (analysis: AnalysisResponse, prompt: string) => void;
   onNodesChange: (changes: NodeChange<InsightNode>[]) => void;
   onEdgesChange: (changes: EdgeChange<InsightEdge>[]) => void;
+
+  // Selection
+  setSelectedNodeId: (id: string | null) => void;
 
   // Editing
   updateNodeData: (nodeId: string, updates: Partial<InsightNodeData>) => void;
@@ -41,6 +57,11 @@ interface CanvasState {
   restoreNode: (node: InsightNode, edges: InsightEdge[]) => void;
   changeNodeType: (nodeId: string, newType: NodeType) => void;
   clearEditHistory: () => void;
+
+  // Node actions (Spec 14)
+  duplicateNode: (nodeId: string) => void;
+  disconnectNode: (nodeId: string) => void;
+  applyExploreResult: (parentNodeId: string, nodes: AnalysisNode[], edges: AnalysisEdge[]) => void;
 
   // Manual creation (Spec 07)
   addNode: (position: { x: number; y: number }) => void;
@@ -50,6 +71,9 @@ interface CanvasState {
   // Refinement
   setRefining: (v: boolean) => void;
   applyRefinement: (response: RefineResponse) => void;
+
+  // Chat operations (Spec 15)
+  applyChatOperations: (ops: ChatOperations) => void;
 
   // Fog
   toggleFog: () => void;
@@ -69,6 +93,73 @@ interface CanvasState {
   redo: () => void;
 }
 
+function getNextNodeId(nodes: InsightNode[]): string {
+  const maxN = nodes.reduce((max, n) => {
+    const match = n.id.match(/^node_(\d+)$/);
+    return match ? Math.max(max, parseInt(match[1], 10)) : max;
+  }, 0);
+  return `node_${maxN + 1}`;
+}
+
+function applyOps(
+  state: { nodes: InsightNode[]; edges: InsightEdge[] },
+  ops: ChatOperations,
+): { nodes: InsightNode[]; edges: InsightEdge[] } {
+  let nodes = [...state.nodes];
+  let edges = [...state.edges];
+
+  // Remove nodes
+  const removeIds = new Set(ops.removeNodeIds);
+  nodes = nodes.filter((n) => !removeIds.has(n.id));
+  edges = edges.filter(
+    (e) => !removeIds.has(e.source) && !removeIds.has(e.target)
+  );
+
+  // Update nodes
+  for (const update of ops.updateNodes) {
+    nodes = nodes.map((n) => {
+      if (n.id !== update.id) return n;
+      return {
+        ...n,
+        data: {
+          ...n.data,
+          ...(update.label !== undefined && { label: update.label }),
+          ...(update.description !== undefined && { description: update.description }),
+          ...(update.type !== undefined && { nodeType: update.type }),
+        },
+      };
+    });
+  }
+
+  // Remove edges
+  for (const re of ops.removeEdges) {
+    edges = edges.filter(
+      (e) => !(e.source === re.source && e.target === re.target)
+    );
+  }
+
+  // Create new edges
+  const ts = Date.now();
+  const newEdges: InsightEdge[] = ops.addEdges.map((e, i) => ({
+    id: `edge_new_${ts}_${i}`,
+    source: e.source,
+    target: e.target,
+    type: "smoothstep",
+    label: e.label,
+  }));
+
+  // Add new nodes with layout
+  if (ops.addNodes.length > 0) {
+    const allEdges = [...edges, ...newEdges];
+    const newPositioned = layoutNewNodes(nodes, ops.addNodes, allEdges);
+    nodes = [...nodes, ...newPositioned];
+  }
+
+  edges = [...edges, ...newEdges];
+
+  return { nodes, edges };
+}
+
 export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodes: [],
   edges: [],
@@ -79,6 +170,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   isLoading: false,
   isFogged: false,
   _fitViewTrigger: 0,
+  selectedNodeId: null,
 
   setAnalysis: (analysis, prompt) => {
     const { nodes, edges } = layoutAnalysis(analysis);
@@ -126,6 +218,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     }));
   },
 
+  setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+
   updateNodeData: (nodeId, updates) => {
     const state = get();
     const node = state.nodes.find((n) => n.id === nodeId);
@@ -166,6 +260,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     snapshot();
 
+    // Spec 17: exit focus if deleting focused node
+    getFocusStore().then((s) => {
+      if (s.getState().focusedNodeId === nodeId) {
+        s.getState().exitFocus();
+      }
+    });
+
     const connectedEdges = state.edges.filter(
       (e) => e.source === nodeId || e.target === nodeId
     );
@@ -179,6 +280,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         ...state.editHistory,
         { type: "node_deleted", nodeId, label: node.data.label },
       ],
+      selectedNodeId: state.selectedNodeId === nodeId ? null : state.selectedNodeId,
     });
 
     return { node, edges: connectedEdges };
@@ -215,15 +317,65 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   clearEditHistory: () => set({ editHistory: [] }),
 
+  // Spec 14: Duplicate node
+  duplicateNode: (nodeId) => {
+    const state = get();
+    const node = state.nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    snapshot();
+    const newId = getNextNodeId(state.nodes);
+    const newNode: InsightNode = {
+      id: newId,
+      type: "insight",
+      position: { x: node.position.x + 40, y: node.position.y + 40 },
+      data: { ...node.data, animationDelay: 0 },
+    };
+    set({ nodes: [...state.nodes, newNode] });
+  },
+
+  // Spec 14: Disconnect node (remove all edges)
+  disconnectNode: (nodeId) => {
+    const state = get();
+    const hasEdges = state.edges.some(
+      (e) => e.source === nodeId || e.target === nodeId
+    );
+    if (!hasEdges) return;
+
+    snapshot();
+    set({
+      edges: state.edges.filter(
+        (e) => e.source !== nodeId && e.target !== nodeId
+      ),
+    });
+  },
+
+  // Spec 14: Apply explore result
+  applyExploreResult: (parentNodeId, nodes, edges) => {
+    snapshot();
+    const state = get();
+    const newEdges: InsightEdge[] = edges.map((e, i) => ({
+      id: `edge_explore_${Date.now()}_${i}`,
+      source: e.source,
+      target: e.target,
+      type: "smoothstep",
+      label: e.label,
+    }));
+    const allEdges = [...state.edges, ...newEdges];
+    const newPositioned = layoutNewNodes(state.nodes, nodes, allEdges);
+
+    set((s) => ({
+      nodes: [...s.nodes, ...newPositioned],
+      edges: [...s.edges, ...newEdges],
+      _fitViewTrigger: s._fitViewTrigger + 1,
+    }));
+  },
+
   // Spec 07: Manual node creation
   addNode: (position) => {
     snapshot();
     const state = get();
-    const maxN = state.nodes.reduce((max, n) => {
-      const match = n.id.match(/^node_(\d+)$/);
-      return match ? Math.max(max, parseInt(match[1], 10)) : max;
-    }, 0);
-    const newId = `node_${maxN + 1}`;
+    const newId = getNextNodeId(state.nodes);
 
     const newNode: InsightNode = {
       id: newId,
@@ -300,66 +452,34 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   applyRefinement: (response) => {
     snapshot();
     const state = get();
-    let nodes = [...state.nodes];
-    let edges = [...state.edges];
-
-    // 1. Remove nodes
-    const removeIds = new Set(response.removeNodeIds);
-    nodes = nodes.filter((n) => !removeIds.has(n.id));
-    edges = edges.filter(
-      (e) => !removeIds.has(e.source) && !removeIds.has(e.target)
-    );
-
-    // 2. Update existing nodes
-    for (const update of response.updateNodes) {
-      nodes = nodes.map((n) => {
-        if (n.id !== update.id) return n;
-        return {
-          ...n,
-          data: {
-            ...n.data,
-            ...(update.label !== undefined && { label: update.label }),
-            ...(update.description !== undefined && { description: update.description }),
-            ...(update.type !== undefined && { nodeType: update.type }),
-          },
-        };
-      });
-    }
-
-    // 3. Remove edges
-    for (const re of response.removeEdges) {
-      edges = edges.filter(
-        (e) => !(e.source === re.source && e.target === re.target)
-      );
-    }
-
-    // 4. Create new edges
-    const ts = Date.now();
-    const newEdges: InsightEdge[] = response.addEdges.map((e, i) => ({
-      id: `edge_new_${ts}_${i}`,
-      source: e.source,
-      target: e.target,
-      type: "smoothstep",
-      label: e.label,
-    }));
-
-    // 5. Add new nodes with layout (needs all edges for positioning)
-    if (response.addNodes.length > 0) {
-      const allEdges = [...edges, ...newEdges];
-      const newPositioned = layoutNewNodes(nodes, response.addNodes, allEdges);
-      nodes = [...nodes, ...newPositioned];
-    }
-
-    // 6. Add new edges
-    edges = [...edges, ...newEdges];
+    const result = applyOps(state, response);
 
     set((s) => ({
-      nodes,
-      edges,
+      ...result,
       summary: response.summary || state.summary,
       editHistory: [],
       isRefining: false,
       isFogged: true,
+      _fitViewTrigger: s._fitViewTrigger + 1,
+    }));
+  },
+
+  // Spec 15: Apply chat operations
+  applyChatOperations: (ops) => {
+    const hasOps =
+      ops.addNodes.length > 0 ||
+      ops.updateNodes.length > 0 ||
+      ops.removeNodeIds.length > 0 ||
+      ops.addEdges.length > 0 ||
+      ops.removeEdges.length > 0;
+    if (!hasOps) return;
+
+    snapshot();
+    const state = get();
+    const result = applyOps(state, ops);
+
+    set((s) => ({
+      ...result,
       _fitViewTrigger: s._fitViewTrigger + 1,
     }));
   },
@@ -381,6 +501,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   // Spec 06: Reset
   resetCanvas: () => {
     useUndoStore.getState().clear();
+    getChatStore().then((s) => s.getState().clearChat());
+    getGhostStore().then((s) => s.getState().clearGhosts());
+    getFocusStore().then((s) => s.getState().exitFocus());
     set({
       nodes: [],
       edges: [],
@@ -390,6 +513,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       isRefining: false,
       isLoading: false,
       isFogged: false,
+      selectedNodeId: null,
     });
   },
 
@@ -402,6 +526,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const prev = useUndoStore.getState().undo(current);
     if (!prev) return;
     set({ nodes: prev.nodes, edges: prev.edges });
+    getFocusStore().then((s) => s.getState().recalculateBranch());
   },
 
   redo: () => {
@@ -410,5 +535,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const next = useUndoStore.getState().redo(current);
     if (!next) return;
     set({ nodes: next.nodes, edges: next.edges });
+    getFocusStore().then((s) => s.getState().recalculateBranch());
   },
 }));

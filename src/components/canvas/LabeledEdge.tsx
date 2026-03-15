@@ -7,9 +7,12 @@ import {
   type EdgeProps,
 } from "@xyflow/react";
 import { useCanvasStore } from "@/stores/canvas-store";
+import { useFocusStore } from "@/stores/focus-store";
 
 export function LabeledEdge({
   id,
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -35,6 +38,13 @@ export function LabeledEdge({
 
   const labelText = typeof label === "string" ? label : "";
 
+  // Spec 17: Focus mode dimming
+  const focusedNodeId = useFocusStore((s) => s.focusedNodeId);
+  const branchNodeIds = useFocusStore((s) => s.branchNodeIds);
+  const isFocusActive = focusedNodeId !== null;
+  const isEdgeInBranch = branchNodeIds.includes(source) && branchNodeIds.includes(target);
+  const isDimmed = isFocusActive && !isEdgeInBranch;
+
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus();
@@ -59,11 +69,15 @@ export function LabeledEdge({
     setEditing(false);
   }, []);
 
+  const edgeStyle = isDimmed
+    ? { ...style, opacity: 0.08, transition: "opacity 0.3s" }
+    : { ...style, transition: "opacity 0.3s" };
+
   return (
     <>
       <path
         d={edgePath}
-        style={style}
+        style={edgeStyle}
         className="react-flow__edge-path"
         fill="none"
         onMouseEnter={() => setHovered(true)}
@@ -99,7 +113,7 @@ export function LabeledEdge({
             startEdit();
           }}
         >
-          {editing ? (
+          {isDimmed ? null : editing ? (
             <input
               ref={inputRef}
               dir="auto"

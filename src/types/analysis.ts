@@ -80,3 +80,81 @@ export interface IntakeRound {
   questions: IntakeQuestion[];
   answers: IntakeAnswer[];
 }
+
+// ─── Spec 14: Explore node ───
+export interface ExploreRequest {
+  nodeId: string;
+  nodeLabel: string;
+  nodeDescription: string;
+  nodeType: NodeType;
+  originalPrompt: string;
+  currentNodes: AnalysisNode[];
+  currentEdges: AnalysisEdge[];
+}
+
+export interface ExploreResponse {
+  nodes: AnalysisNode[];
+  edges: AnalysisEdge[];
+}
+
+// ─── Spec 15: Contextual chat ───
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  operations?: ChatOperations;
+  timestamp: number;
+}
+
+export interface ChatOperations {
+  addNodes: AnalysisNode[];
+  updateNodes: Array<{ id: string; label?: string; description?: string; type?: NodeType }>;
+  removeNodeIds: string[];
+  addEdges: AnalysisEdge[];
+  removeEdges: Array<{ source: string; target: string }>;
+}
+
+export interface ChatRequest {
+  message: string;
+  originalPrompt: string;
+  currentNodes: AnalysisNode[];
+  currentEdges: AnalysisEdge[];
+  selectedNodeId?: string;
+  selectedNodeLabel?: string;
+  chatHistory: Array<{ role: "user" | "assistant"; content: string }>;
+  /** Structured graph context for the selected/focused node */
+  graphContext?: {
+    selectedNode: AnalysisNode;
+    directParents: AnalysisNode[];
+    directChildren: AnalysisNode[];
+    ancestors: AnalysisNode[];
+    descendants: AnalysisNode[];
+    relevantEdges: AnalysisEdge[];
+  };
+}
+
+export interface ChatResponse {
+  message: string;
+  operations: ChatOperations;
+}
+
+// ─── Spec 16: Ghost nodes ───
+export interface GhostSuggestion {
+  id: string;
+  type: NodeType;
+  questionText: string;
+  label: string;
+  description: string;
+  connectTo: string;
+}
+
+export interface SuggestGhostsRequest {
+  originalPrompt: string;
+  currentNodes: AnalysisNode[];
+  currentEdges: AnalysisEdge[];
+  dismissedTopics: string[];
+}
+
+export interface SuggestGhostsResponse {
+  suggestions: GhostSuggestion[];
+}

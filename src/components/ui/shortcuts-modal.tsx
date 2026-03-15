@@ -14,6 +14,8 @@ const SHORTCUTS = [
   { key: "Backspace / Delete", action: "Delete selected" },
   { key: "⌘ Z", action: "Undo" },
   { key: "⌘ ⇧ Z", action: "Redo" },
+  { key: "F", action: "Focus on selected branch" },
+  { key: "Escape", action: "Exit focus mode" },
   { key: "?", action: "Show shortcuts" },
 ];
 

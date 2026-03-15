@@ -118,4 +118,55 @@ export const soundEngine = {
     setTimeout(() => synth.triggerAttackRelease("E4", "50ms"), 30);
     setTimeout(() => synth.dispose(), 200);
   },
+
+  // Spec 14: Explore arpeggio
+  playExplore() {
+    if (!isReady()) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.01, decay: 0.06, sustain: 0, release: 0.02 },
+    }).toDestination();
+    synth.triggerAttackRelease("C4", "40ms");
+    setTimeout(() => synth.triggerAttackRelease("E4", "40ms"), 40);
+    setTimeout(() => synth.triggerAttackRelease("G4", "40ms"), 80);
+    setTimeout(() => synth.dispose(), 250);
+  },
+
+  // Spec 15: Chat send blip
+  playChatSend() {
+    if (!isReady()) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.005, decay: 0.06, sustain: 0, release: 0.01 },
+      volume: -8,
+    }).toDestination();
+    synth.triggerAttackRelease("G4", "40ms");
+    setTimeout(() => synth.dispose(), 150);
+  },
+
+  // Spec 15: Chat receive
+  playChatReceive() {
+    if (!isReady()) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.01, decay: 0.08, sustain: 0, release: 0.02 },
+      volume: -6,
+    }).toDestination();
+    synth.triggerAttackRelease("E4", "60ms");
+    setTimeout(() => synth.triggerAttackRelease("G4", "60ms"), 50);
+    setTimeout(() => synth.dispose(), 200);
+  },
+
+  // Spec 16: Ghost dismiss
+  playGhostDismiss() {
+    if (!isReady()) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.02 },
+      volume: -12,
+    }).toDestination();
+    synth.triggerAttackRelease("E4", "80ms");
+    setTimeout(() => synth.triggerAttackRelease("C4", "80ms"), 60);
+    setTimeout(() => synth.dispose(), 250);
+  },
 };

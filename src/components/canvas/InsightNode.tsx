@@ -1,12 +1,13 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Handle, Position, useStore, type NodeProps } from "@xyflow/react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import type { InsightNode as InsightNodeType } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 import { NODE_COLORS } from "@/types/canvas";
 import { useCanvasStore } from "@/stores/canvas-store";
+import { useFocusStore } from "@/stores/focus-store";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useFloatingMotion } from "@/hooks/use-floating-motion";
@@ -19,6 +20,8 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
   const reducedMotion = useReducedMotion();
   const delay = data.animationDelay ?? 0;
   const isFogged = useCanvasStore((s) => s.isFogged);
+  const focusedNodeId = useFocusStore((s) => s.focusedNodeId);
+  const branchNodeIds = useFocusStore((s) => s.branchNodeIds);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +31,12 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
   const floatY = useFloatingMotion(id, isDragging || reducedMotion);
 
   const revealed = !isFogged || isHovered || isEditing;
+
+  // Spec 17: Focus mode
+  const isFocusActive = focusedNodeId !== null;
+  const isInBranch = branchNodeIds.includes(id);
+  const isFocusedNode = focusedNodeId === id;
+  const isDimmed = isFocusActive && !isInBranch;
 
   const onLabelCommit = useCallback(
     (newLabel: string) => {
@@ -56,9 +65,17 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
 
   const entryDuration = reducedMotion ? 0 : 0.35;
 
-  const glowShadow = isHovered
-    ? `0 0 20px 4px ${color}25, 0 0 6px 2px ${color}18`
-    : `0 0 var(--node-glow-spread) 2px ${color}15, 0 0 4px 1px ${color}10`;
+  const focusGlow = isFocusedNode
+    ? `0 0 24px 6px ${color}30, 0 0 8px 3px var(--accent-glow)`
+    : undefined;
+
+  const glowShadow = focusGlow
+    ?? (isHovered
+      ? `0 0 20px 4px ${color}25, 0 0 6px 2px ${color}18`
+      : `0 0 var(--node-glow-spread) 2px ${color}15, 0 0 4px 1px ${color}10`);
+
+  // Compute target opacity
+  const targetOpacity = isDimmed ? 0.15 : revealed ? 1 : 0.42;
 
   return (
     <motion.div
@@ -73,14 +90,15 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
         borderLeftColor: isHovered ? "var(--border-hover)" : "var(--border)",
         boxShadow: glowShadow,
         y: floatY,
+        pointerEvents: isDimmed ? "none" : "auto",
       }}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{
-        opacity: revealed ? 1 : 0.42,
+        opacity: targetOpacity,
         scale: 1,
       }}
       transition={{
-        opacity: { duration: 0.18, ease: "easeOut" },
+        opacity: { duration: 0.3, ease: "easeOut" },
         scale: {
           duration: entryDuration,
           delay: reducedMotion ? 0 : delay,

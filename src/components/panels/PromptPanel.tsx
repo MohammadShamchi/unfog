@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, RefreshCw, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -9,6 +10,8 @@ import { useCanvasStore } from "@/stores/canvas-store";
 import { useHistoryStore } from "@/stores/history-store";
 import { useIntakeStore } from "@/stores/intake-store";
 import { IntakeTrail } from "./IntakeTrail";
+import { NodeInspector } from "./NodeInspector";
+import { CanvasChat } from "./CanvasChat";
 import { useIntakeHandler } from "@/hooks/use-intake-handler";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { formatEditHistory } from "@/lib/format-edit-history";
@@ -16,6 +19,30 @@ import { formatRelativeTime } from "@/lib/utils";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 
 export function PromptPanelContent() {
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+
+  // If a node is selected, show the inspector instead
+  if (selectedNodeId) {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="inspector"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="h-full"
+        >
+          <NodeInspector />
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  return <DefaultPanelContent />;
+}
+
+function DefaultPanelContent() {
   const [prompt, setPrompt] = useState("");
   const [editsExpanded, setEditsExpanded] = useState(false);
 
@@ -152,6 +179,13 @@ export function PromptPanelContent() {
               {summary}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Spec 15: Contextual chat */}
+      {nodes.length > 0 && (
+        <div className="px-5 pb-4">
+          <CanvasChat />
         </div>
       )}
 

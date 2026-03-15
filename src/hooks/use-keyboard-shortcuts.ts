@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useCanvasStore } from "@/stores/canvas-store";
+import { useFocusStore } from "@/stores/focus-store";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
 export function useKeyboardShortcuts(onShowHelp: () => void) {
@@ -9,6 +10,17 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
       const tag = target.tagName;
+
+      // Escape → exit focus (check before other handlers, works even in inputs)
+      if (e.key === "Escape") {
+        const focusState = useFocusStore.getState();
+        if (focusState.focusedNodeId) {
+          e.preventDefault();
+          focusState.exitFocus();
+          return;
+        }
+      }
+
       if (tag === "INPUT" || tag === "TEXTAREA") return;
 
       // ? → show shortcuts
@@ -16,6 +28,24 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
         e.preventDefault();
         onShowHelp();
         return;
+      }
+
+      // F → toggle focus on selected node
+      if (e.key === "f" && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+        const selectedId = useCanvasStore.getState().selectedNodeId;
+        const focusState = useFocusStore.getState();
+
+        if (focusState.focusedNodeId) {
+          e.preventDefault();
+          focusState.exitFocus();
+          return;
+        }
+
+        if (selectedId) {
+          e.preventDefault();
+          focusState.enterFocus(selectedId);
+          return;
+        }
       }
 
       // Cmd+Z → undo
