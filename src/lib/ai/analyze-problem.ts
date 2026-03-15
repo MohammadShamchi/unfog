@@ -39,6 +39,27 @@ const analysisSchema = {
   required: ["summary", "nodes", "edges"],
 };
 
+// ─── Robust JSON parsing (Gemini occasionally produces trailing commas / markdown fences) ───
+function safeParseJSON(raw: string): AnalysisResponse {
+  // Strip markdown code fences if present
+  let text = raw.trim();
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    text = fenceMatch[1].trim();
+  }
+
+  // Remove trailing commas before } or ]
+  text = text.replace(/,\s*([}\]])/g, "$1");
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Failed to parse AI response as JSON. Raw (first 500 chars): ${raw.slice(0, 500)}`
+    );
+  }
+}
+
 // ─── Initialize client ───
 function getClient() {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
@@ -50,13 +71,12 @@ function getClient() {
   return new GoogleGenAI({ apiKey });
 }
 
-// ─── Main analysis function ───
-export async function analyzeProblem(
-  userPrompt: string
+// ─── Single attempt ───
+async function callAnalysis(
+  client: GoogleGenAI,
+  model: string,
+  userPrompt: string,
 ): Promise<AnalysisResponse> {
-  const client = getClient();
-  const model = process.env.AI_MODEL || "gemini-2.5-flash";
-
   const response = await client.models.generateContent({
     model,
     contents: [
@@ -68,27 +88,41 @@ export async function analyzeProblem(
     config: {
       systemInstruction: ANALYSIS_SYSTEM_PROMPT,
       temperature: parseFloat(process.env.AI_TEMPERATURE || "0.3"),
-      maxOutputTokens: parseInt(process.env.AI_MAX_TOKENS || "2000"),
+      maxOutputTokens: parseInt(process.env.AI_MAX_TOKENS || "4096"),
       responseMimeType: "application/json",
       responseSchema: analysisSchema,
     },
   });
 
-  // Parse the response — Gemini returns valid JSON when schema is enforced
-  const text = response.text;
-  if (!text) {
+  const rawText = response.text;
+  if (!rawText) {
     throw new Error("Empty response from AI model");
   }
 
-  const parsed: AnalysisResponse = JSON.parse(text);
+  return safeParseJSON(rawText);
+}
+
+// ─── Main analysis function (retries once on parse failure) ───
+export async function analyzeProblem(
+  userPrompt: string,
+): Promise<AnalysisResponse> {
+  const client = getClient();
+  const model = process.env.AI_MODEL || "gemini-2.5-flash";
+
+  let parsed: AnalysisResponse;
+  try {
+    parsed = await callAnalysis(client, model, userPrompt);
+  } catch (firstError) {
+    console.warn("[Unfog AI] First attempt failed, retrying:", firstError);
+    parsed = await callAnalysis(client, model, userPrompt);
+  }
 
   // Validate node count (safety rail)
   if (parsed.nodes.length > 15) {
     parsed.nodes = parsed.nodes.slice(0, 15);
-    // Remove edges referencing deleted nodes
     const validIds = new Set(parsed.nodes.map((n) => n.id));
     parsed.edges = parsed.edges.filter(
-      (e) => validIds.has(e.source) && validIds.has(e.target)
+      (e) => validIds.has(e.source) && validIds.has(e.target),
     );
   }
 

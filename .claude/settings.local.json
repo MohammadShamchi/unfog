@@ -11,7 +11,18 @@
       "Bash(git init:*)",
       "Bash(cd:*)",
       "Bash(cp:*)",
-      "Bash(bunx:*)"
+      "Bash(bunx:*)",
+      "Bash(curl:*)",
+      "Bash(kill:*)",
+      "Bash(lsof:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/amohii/dev/unfog/**)",
+      "Bash(done)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)"
     ]
   }
 }

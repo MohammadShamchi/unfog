@@ -277,6 +277,16 @@
   display: none;
 }
 
+/* ========== RESPONSIVE ========== */
+@media (max-width: 767px) {
+  .react-flow__controls {
+    bottom: 56px !important;
+  }
+  .react-flow__minimap {
+    display: none;
+  }
+}
+
 /* ========== BASE ========== */
 @layer base {
   * {

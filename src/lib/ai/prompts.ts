@@ -53,3 +53,63 @@ Return a JSON object with this structure:
   "addEdges": [],
   "removeEdges": []
 }`;
+
+import type { IntakeRound } from "@/types/analysis";
+
+export const INTAKE_ASSESSMENT_PROMPT = `You are an expert problem analyst preparing to create a visual clarity map. 
+
+The user has described their situation. Your job: decide if you have enough context to create a useful, specific diagram, or if you need to ask 1-3 focused questions first.
+
+RULES FOR DECIDING:
+1. If the input is detailed enough to identify at least 3 specific problems/causes/solutions → mark as sufficient.
+2. If the input is vague, uses general terms like "bad" or "mess" without specifics → mark as NOT sufficient.
+3. If the input has fewer than 20 words → almost always NOT sufficient.
+4. If the input mentions specific metrics, names, or concrete situations → likely sufficient.
+
+RULES FOR QUESTIONS (when not sufficient):
+1. Ask 1-3 questions maximum. Prefer fewer.
+2. Each question must dig into a SPECIFIC gap in context — not generic.
+3. Provide 2-4 concrete answer options per question. These should be realistic guesses based on what the user said.
+4. Set allowCustom to true on every question (user can always type their own).
+5. Questions must be in the SAME LANGUAGE as the user's input.
+6. Options must be short (under 10 words each).
+7. Questions should uncover: root causes, scale/severity, what they've already tried, or key constraints.
+
+DO NOT ask:
+- Generic questions like "Can you tell me more?"
+- Questions about things they already clearly stated
+- More than 3 questions
+
+RESPOND IN THE SAME LANGUAGE AS THE USER'S INPUT.
+
+OUTPUT FORMAT (JSON):
+{
+  "sufficient": false,
+  "questions": [
+    {
+      "id": "q_1",
+      "question": "What does 'bad sales' actually mean for you?",
+      "options": ["No new leads coming in", "Leads come but don't convert", "Existing customers churning", "Price is too high"],
+      "allowCustom": true
+    }
+  ],
+  "reasoning": "User mentioned sales are bad but didn't specify whether the issue is lead generation, conversion, or retention."
+}`;
+
+export function buildEnrichedPrompt(
+  originalPrompt: string,
+  rounds: IntakeRound[]
+): string {
+  let enriched = originalPrompt;
+
+  if (rounds.length > 0) {
+    enriched += "\n\n--- Additional context from clarifying questions ---\n";
+    for (const round of rounds) {
+      for (const answer of round.answers) {
+        enriched += `\nQ: ${answer.question}\nA: ${answer.answer}\n`;
+      }
+    }
+  }
+
+  return enriched;
+}
