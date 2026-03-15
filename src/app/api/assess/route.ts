@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assessIntake } from "@/lib/ai/assess-intake";
+import type { AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json();
+    const body = await request.json();
+    const { prompt } = body;
+    const aiConfig: AIConfig | undefined = body.aiConfig;
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const assessment = await assessIntake(prompt);
+    const assessment = await assessIntake(prompt, aiConfig);
 
     // Cap questions at 3
     if (assessment.questions && assessment.questions.length > 3) {

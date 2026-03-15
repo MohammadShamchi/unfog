@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { suggestGhosts } from "@/lib/ai/suggest-ghosts";
-import type { SuggestGhostsRequest } from "@/types/analysis";
+import type { SuggestGhostsRequest, AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const body: SuggestGhostsRequest = await request.json();
+    const body = await request.json();
+    const aiConfig: AIConfig | undefined = body.aiConfig;
+    const suggestBody: SuggestGhostsRequest = body;
 
     const startTime = Date.now();
-    const result = await suggestGhosts(body);
+    const result = await suggestGhosts(suggestBody, aiConfig);
     const duration = Date.now() - startTime;
 
     console.log(
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result,
       meta: {
-        model: process.env.AI_MODEL || "gemini-2.5-flash",
+        model: aiConfig?.model || process.env.AI_MODEL || "gemini-2.5-flash",
         durationMs: duration,
       },
     });

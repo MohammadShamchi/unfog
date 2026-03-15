@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useChatStore } from "@/stores/chat-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useFocusStore } from "@/stores/focus-store";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { apiPostWithRetry } from "@/lib/api-client";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { buildNodeGraphContext } from "@/lib/graph/causal-chain";
 
@@ -80,19 +80,15 @@ export function CanvasChat({ selectedNodeId }: CanvasChatProps) {
         graphContext = buildNodeGraphContext(contextNodeId, analysisNodes, analysisEdges);
       }
 
-      const res = await fetchWithRetry("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          originalPrompt,
-          currentNodes,
-          currentEdges,
-          selectedNodeId: selectedNodeId ?? undefined,
-          selectedNodeLabel: selectedNode?.data.label,
-          chatHistory: useChatStore.getState().getContextMessages(),
-          graphContext: graphContext ?? undefined,
-        }),
+      const res = await apiPostWithRetry("/api/chat", {
+        message: text,
+        originalPrompt,
+        currentNodes,
+        currentEdges,
+        selectedNodeId: selectedNodeId ?? undefined,
+        selectedNodeLabel: selectedNode?.data.label,
+        chatHistory: useChatStore.getState().getContextMessages(),
+        graphContext: graphContext ?? undefined,
       });
 
       const data = await res.json();

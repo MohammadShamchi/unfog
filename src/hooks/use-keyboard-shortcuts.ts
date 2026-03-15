@@ -5,7 +5,7 @@ import { useCanvasStore } from "@/stores/canvas-store";
 import { useFocusStore } from "@/stores/focus-store";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
-export function useKeyboardShortcuts(onShowHelp: () => void) {
+export function useKeyboardShortcuts(onShowHelp: () => void, onShowSettings?: () => void) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
@@ -19,6 +19,13 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
           focusState.exitFocus();
           return;
         }
+      }
+
+      // Cmd+, → open settings (works even in inputs)
+      if (e.key === "," && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        onShowSettings?.();
+        return;
       }
 
       if (tag === "INPUT" || tag === "TEXTAREA") return;
@@ -66,5 +73,5 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onShowHelp]);
+  }, [onShowHelp, onShowSettings]);
 }

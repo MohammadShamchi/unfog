@@ -1,6 +1,6 @@
-import { getClient, safeParseJSON, getModel, getTemperature, generateWithBackoff } from "./client";
+import { createProviderFromConfig, safeParseJSON, resolveTemperature } from "./client";
 import { EXPLORE_SYSTEM_PROMPT } from "./prompts";
-import type { ExploreRequest, ExploreResponse } from "@/types/analysis";
+import type { ExploreRequest, ExploreResponse, AIConfig } from "@/types/analysis";
 
 const exploreSchema = {
   type: "object" as const,
@@ -37,9 +37,8 @@ const exploreSchema = {
   required: ["nodes", "edges"],
 };
 
-export async function exploreNode(input: ExploreRequest): Promise<ExploreResponse> {
-  const client = getClient();
-  const model = getModel();
+export async function exploreNode(input: ExploreRequest, config?: AIConfig): Promise<ExploreResponse> {
+  const provider = createProviderFromConfig(config);
 
   const userMessage = `SELECTED NODE:
 ID: ${input.nodeId}
@@ -58,20 +57,14 @@ ${JSON.stringify(input.currentEdges, null, 2)}
 
 Break down the selected node into 2-4 deeper sub-nodes.`;
 
-  const response = await generateWithBackoff(client, {
-    model,
-    contents: [{ role: "user", parts: [{ text: userMessage }] }],
-    config: {
-      systemInstruction: EXPLORE_SYSTEM_PROMPT,
-      temperature: getTemperature(),
-      maxOutputTokens: 2048,
-      responseMimeType: "application/json",
-      responseSchema: exploreSchema,
-    },
-  }, "[Unfog AI Explore]");
+  const rawText = await provider.generate({
+    systemPrompt: EXPLORE_SYSTEM_PROMPT,
+    userMessage,
+    maxOutputTokens: 2048,
+    temperature: resolveTemperature(config),
+    responseSchema: exploreSchema,
+  });
 
-  const rawText = response.text;
-  if (!rawText) throw new Error("Empty response from AI model");
   const parsed = safeParseJSON<ExploreResponse>(rawText);
 
   // Cap at 4 nodes

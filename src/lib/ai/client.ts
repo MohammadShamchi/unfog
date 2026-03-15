@@ -1,4 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
+import type { AIConfig } from "@/types/analysis";
+import type { AIProviderAdapter } from "./providers/types";
+import { createProvider } from "./providers";
+import { GeminiAdapter } from "./providers/gemini";
 
 export function getClient() {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
@@ -83,4 +87,32 @@ export async function generateWithBackoff(
   }
 
   throw lastError;
+}
+
+/**
+ * Creates a provider adapter from user config or falls back to env vars.
+ * Used by all AI lib functions to support multi-provider.
+ */
+export function createProviderFromConfig(config?: AIConfig): AIProviderAdapter {
+  if (config && config.apiKey && config.model) {
+    return createProvider(config);
+  }
+
+  // Fallback to env vars (backward compatibility)
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "No AI provider configured. Add an API key in Settings or set GOOGLE_AI_API_KEY."
+    );
+  }
+  const model = process.env.AI_MODEL || "gemini-2.5-flash";
+  return new GeminiAdapter(apiKey, model);
+}
+
+/**
+ * Returns the temperature from config or env var fallback.
+ */
+export function resolveTemperature(config?: AIConfig): number {
+  if (config?.temperature !== undefined) return config.temperature;
+  return getTemperature();
 }

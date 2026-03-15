@@ -16,7 +16,7 @@ import { useIntakeHandler } from "@/hooks/use-intake-handler";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { formatEditHistory } from "@/lib/format-edit-history";
 import { formatRelativeTime } from "@/lib/utils";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { apiPostWithRetry } from "@/lib/api-client";
 
 export function PromptPanelContent() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
@@ -88,15 +88,11 @@ function DefaultPanelContent() {
         label: typeof e.label === "string" ? e.label : undefined,
       }));
 
-      const res = await fetchWithRetry("/api/refine", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          originalPrompt,
-          currentNodes,
-          currentEdges,
-          editHistory,
-        }),
+      const res = await apiPostWithRetry("/api/refine", {
+        originalPrompt,
+        currentNodes,
+        currentEdges,
+        editHistory,
       });
       const data = await res.json();
 

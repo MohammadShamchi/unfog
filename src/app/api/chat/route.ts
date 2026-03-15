@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canvasChat } from "@/lib/ai/canvas-chat";
-import type { ChatRequest } from "@/types/analysis";
+import type { ChatRequest, AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const body: ChatRequest = await request.json();
+    const body = await request.json();
+    const aiConfig: AIConfig | undefined = body.aiConfig;
+    const chatBody: ChatRequest = body;
 
-    if (!body.message || typeof body.message !== "string") {
+    if (!chatBody.message || typeof chatBody.message !== "string") {
       return NextResponse.json(
         { error: "Missing message" },
         { status: 400 }
       );
     }
 
-    if (body.message.trim().length === 0) {
+    if (chatBody.message.trim().length === 0) {
       return NextResponse.json(
         { error: "Empty message" },
         { status: 400 }
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const startTime = Date.now();
-    const result = await canvasChat(body);
+    const result = await canvasChat(chatBody, aiConfig);
     const duration = Date.now() - startTime;
 
     const opCount =
@@ -30,14 +32,14 @@ export async function POST(request: NextRequest) {
       result.operations.removeNodeIds.length;
 
     console.log(
-      `[Unfog AI Chat] "${body.message.slice(0, 50)}" → ${opCount} ops, ${duration}ms`
+      `[Unfog AI Chat] "${chatBody.message.slice(0, 50)}" → ${opCount} ops, ${duration}ms`
     );
 
     return NextResponse.json({
       success: true,
       data: result,
       meta: {
-        model: process.env.AI_MODEL || "gemini-2.5-flash",
+        model: aiConfig?.model || process.env.AI_MODEL || "gemini-2.5-flash",
         durationMs: duration,
       },
     });
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     const message = error instanceof Error ? error.message : "Unknown error";
 
-    if (message.includes("API_KEY")) {
+    if (message.includes("API_KEY") || message.includes("api_key") || message.includes("authentication")) {
       return NextResponse.json(
         { error: "AI service not configured." },
         { status: 503 }

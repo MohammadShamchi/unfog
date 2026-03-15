@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeProblem } from "@/lib/ai/analyze-problem";
-import type { AnalyzeRequest } from "@/types/analysis";
+import type { AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const body: AnalyzeRequest = await request.json();
+    const body = await request.json();
+    const aiConfig: AIConfig | undefined = body.aiConfig;
 
     // Validate input
     if (!body.prompt || typeof body.prompt !== "string") {
@@ -30,10 +31,9 @@ export async function POST(request: NextRequest) {
 
     // Call AI
     const startTime = Date.now();
-    const analysis = await analyzeProblem(body.prompt);
+    const analysis = await analyzeProblem(body.prompt, aiConfig);
     const duration = Date.now() - startTime;
 
-    // Log for debugging (remove in production)
     console.log(
       `[Unfog AI] ${analysis.nodes.length} nodes, ${analysis.edges.length} edges, ${duration}ms`
     );
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: analysis,
       meta: {
-        model: process.env.AI_MODEL || "gemini-2.5-flash",
+        model: aiConfig?.model || process.env.AI_MODEL || "gemini-2.5-flash",
         durationMs: duration,
         nodeCount: analysis.nodes.length,
         edgeCount: analysis.edges.length,
@@ -51,18 +51,17 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[Unfog AI] Error:", error);
 
-    // Determine error type
     const message =
       error instanceof Error ? error.message : "Unknown error";
 
-    if (message.includes("API_KEY")) {
+    if (message.includes("API_KEY") || message.includes("api_key") || message.includes("authentication")) {
       return NextResponse.json(
         { error: "AI service not configured. Check your API key." },
         { status: 503 }
       );
     }
 
-    if (message.includes("quota") || message.includes("rate")) {
+    if (message.includes("quota") || message.includes("rate") || message.includes("429")) {
       return NextResponse.json(
         { error: "AI service rate limited. Try again in a moment." },
         { status: 429 }

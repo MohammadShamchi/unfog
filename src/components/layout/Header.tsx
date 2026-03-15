@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff, X } from "lucide-react";
+import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSoundStore } from "@/stores/sound-store";
@@ -14,9 +14,10 @@ import { soundEngine } from "@/lib/sound/sound-engine";
 interface HeaderProps {
   isMobile?: boolean;
   onTogglePrompt?: () => void;
+  onOpenSettings?: () => void;
 }
 
-export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
+export function Header({ isMobile, onTogglePrompt, onOpenSettings }: HeaderProps) {
   const soundEnabled = useSoundStore((s) => s.enabled);
   const soundInit = useSoundStore((s) => s.init);
   const soundToggle = useSoundStore((s) => s.toggle);
@@ -188,6 +189,17 @@ export function Header({ isMobile, onTogglePrompt }: HeaderProps) {
               {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </TooltipTrigger>
             <TooltipContent>{soundEnabled ? "Mute sounds" : "Enable sounds"}</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              className="rounded-sm p-1.5 text-text-secondary transition-colors duration-[120ms] hover:bg-hover hover:text-text-primary"
+              aria-label="AI Settings"
+              onClick={onOpenSettings}
+            >
+              <Settings size={16} />
+            </TooltipTrigger>
+            <TooltipContent>AI Settings</TooltipContent>
           </Tooltip>
         </div>
       </TooltipProvider>

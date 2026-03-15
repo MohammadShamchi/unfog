@@ -22,7 +22,11 @@
       "Read(//Users/amohii/dev/unfog/**)",
       "Bash(done)",
       "Bash(gh auth:*)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:openrouter.ai)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:ai.google.dev)"
     ]
   }
 }

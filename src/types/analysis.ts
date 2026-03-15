@@ -1,3 +1,11 @@
+// ─── AI provider configuration ───
+export interface AIConfig {
+  provider: "gemini" | "openai" | "anthropic" | "openrouter";
+  apiKey: string;
+  model: string;
+  temperature: number;
+}
+
 // ─── Node types that map to the visual system ───
 export type NodeType = "problem" | "cause" | "solution" | "context";
 

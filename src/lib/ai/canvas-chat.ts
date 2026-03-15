@@ -1,6 +1,6 @@
-import { getClient, safeParseJSON, getModel, getTemperature, generateWithBackoff } from "./client";
+import { createProviderFromConfig, safeParseJSON, resolveTemperature } from "./client";
 import { CANVAS_CHAT_SYSTEM_PROMPT } from "./prompts";
-import type { ChatRequest, ChatResponse } from "@/types/analysis";
+import type { ChatRequest, ChatResponse, AIConfig } from "@/types/analysis";
 import { formatGraphContext } from "@/lib/graph/causal-chain";
 
 const chatSchema = {
@@ -76,9 +76,8 @@ const chatSchema = {
   required: ["message", "operations"],
 };
 
-export async function canvasChat(input: ChatRequest): Promise<ChatResponse> {
-  const client = getClient();
-  const model = getModel();
+export async function canvasChat(input: ChatRequest, config?: AIConfig): Promise<ChatResponse> {
+  const provider = createProviderFromConfig(config);
 
   let contextStr = `ORIGINAL PROMPT:
 ${input.originalPrompt}
@@ -105,20 +104,14 @@ ${input.chatHistory.map((m) => `${m.role}: ${m.content}`).join("\n")}`;
 
   contextStr += `\n\nUSER MESSAGE:\n${input.message}`;
 
-  const response = await generateWithBackoff(client, {
-    model,
-    contents: [{ role: "user", parts: [{ text: contextStr }] }],
-    config: {
-      systemInstruction: CANVAS_CHAT_SYSTEM_PROMPT,
-      temperature: getTemperature(),
-      maxOutputTokens: 4096,
-      responseMimeType: "application/json",
-      responseSchema: chatSchema,
-    },
-  }, "[Unfog AI Chat]");
+  const rawText = await provider.generate({
+    systemPrompt: CANVAS_CHAT_SYSTEM_PROMPT,
+    userMessage: contextStr,
+    maxOutputTokens: 4096,
+    temperature: resolveTemperature(config),
+    responseSchema: chatSchema,
+  });
 
-  const rawText = response.text;
-  if (!rawText) throw new Error("Empty response from AI model");
   const parsed = safeParseJSON<ChatResponse>(rawText);
 
   // Cap addNodes at 6

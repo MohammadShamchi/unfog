@@ -1,6 +1,6 @@
-import { getClient, safeParseJSON, getModel, getTemperature } from "./client";
+import { createProviderFromConfig, safeParseJSON, resolveTemperature } from "./client";
 import { GHOST_SUGGESTION_PROMPT } from "./prompts";
-import type { SuggestGhostsRequest, SuggestGhostsResponse } from "@/types/analysis";
+import type { SuggestGhostsRequest, SuggestGhostsResponse, AIConfig } from "@/types/analysis";
 
 const ghostSchema = {
   type: "object" as const,
@@ -28,10 +28,10 @@ const ghostSchema = {
 };
 
 export async function suggestGhosts(
-  input: SuggestGhostsRequest
+  input: SuggestGhostsRequest,
+  config?: AIConfig,
 ): Promise<SuggestGhostsResponse> {
-  const client = getClient();
-  const model = getModel();
+  const provider = createProviderFromConfig(config);
 
   const userMessage = `ORIGINAL PROMPT:
 ${input.originalPrompt}
@@ -47,20 +47,14 @@ ${input.dismissedTopics.length > 0 ? `DISMISSED TOPICS (do not suggest these):\n
 Suggest 2-4 things the user hasn't considered.`;
 
   try {
-    const response = await client.models.generateContent({
-      model,
-      contents: [{ role: "user", parts: [{ text: userMessage }] }],
-      config: {
-        systemInstruction: GHOST_SUGGESTION_PROMPT,
-        temperature: getTemperature(),
-        maxOutputTokens: 2048,
-        responseMimeType: "application/json",
-        responseSchema: ghostSchema,
-      },
+    const rawText = await provider.generate({
+      systemPrompt: GHOST_SUGGESTION_PROMPT,
+      userMessage,
+      maxOutputTokens: 2048,
+      temperature: resolveTemperature(config),
+      responseSchema: ghostSchema,
     });
 
-    const rawText = response.text;
-    if (!rawText) throw new Error("Empty response from AI model");
     const parsed = safeParseJSON<SuggestGhostsResponse>(rawText);
 
     // Cap at 4

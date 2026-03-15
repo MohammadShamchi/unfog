@@ -1,6 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import { ANALYSIS_SYSTEM_PROMPT } from "./prompts";
-import type { AnalysisResponse } from "@/types/analysis";
+import { createProviderFromConfig, safeParseJSON, resolveTemperature } from "./client";
+import type { AnalysisResponse, AIConfig } from "@/types/analysis";
 
 // ─── Schema for structured output enforcement ───
 const analysisSchema = {
@@ -39,82 +39,32 @@ const analysisSchema = {
   required: ["summary", "nodes", "edges"],
 };
 
-// ─── Robust JSON parsing (Gemini occasionally produces trailing commas / markdown fences) ───
-function safeParseJSON(raw: string): AnalysisResponse {
-  // Strip markdown code fences if present
-  let text = raw.trim();
-  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenceMatch) {
-    text = fenceMatch[1].trim();
-  }
-
-  // Remove trailing commas before } or ]
-  text = text.replace(/,\s*([}\]])/g, "$1");
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(
-      `Failed to parse AI response as JSON. Raw (first 500 chars): ${raw.slice(0, 500)}`
-    );
-  }
-}
-
-// ─── Initialize client ───
-function getClient() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "GOOGLE_AI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey"
-    );
-  }
-  return new GoogleGenAI({ apiKey });
-}
-
-// ─── Single attempt ───
 async function callAnalysis(
-  client: GoogleGenAI,
-  model: string,
   userPrompt: string,
+  config?: AIConfig,
 ): Promise<AnalysisResponse> {
-  const response = await client.models.generateContent({
-    model,
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: userPrompt }],
-      },
-    ],
-    config: {
-      systemInstruction: ANALYSIS_SYSTEM_PROMPT,
-      temperature: parseFloat(process.env.AI_TEMPERATURE || "0.3"),
-      maxOutputTokens: 4096,
-      responseMimeType: "application/json",
-      responseSchema: analysisSchema,
-    },
+  const provider = createProviderFromConfig(config);
+  const rawText = await provider.generate({
+    systemPrompt: ANALYSIS_SYSTEM_PROMPT,
+    userMessage: userPrompt,
+    maxOutputTokens: 4096,
+    temperature: resolveTemperature(config),
+    responseSchema: analysisSchema,
   });
 
-  const rawText = response.text;
-  if (!rawText) {
-    throw new Error("Empty response from AI model");
-  }
-
-  return safeParseJSON(rawText);
+  return safeParseJSON<AnalysisResponse>(rawText);
 }
 
-// ─── Main analysis function (retries once on parse failure) ───
 export async function analyzeProblem(
   userPrompt: string,
+  config?: AIConfig,
 ): Promise<AnalysisResponse> {
-  const client = getClient();
-  const model = process.env.AI_MODEL || "gemini-2.5-flash";
-
   let parsed: AnalysisResponse;
   try {
-    parsed = await callAnalysis(client, model, userPrompt);
+    parsed = await callAnalysis(userPrompt, config);
   } catch (firstError) {
     console.warn("[Unfog AI] First attempt failed, retrying:", firstError);
-    parsed = await callAnalysis(client, model, userPrompt);
+    parsed = await callAnalysis(userPrompt, config);
   }
 
   // Validate node count (safety rail)

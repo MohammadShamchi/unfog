@@ -1,6 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import { INTAKE_ASSESSMENT_PROMPT } from "./prompts";
-import type { IntakeAssessment } from "@/types/analysis";
+import { createProviderFromConfig, safeParseJSON, resolveTemperature } from "./client";
+import type { IntakeAssessment, AIConfig } from "@/types/analysis";
 
 const assessmentSchema = {
   type: "object" as const,
@@ -27,55 +27,30 @@ const assessmentSchema = {
   required: ["sufficient"],
 };
 
-function getClient() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "GOOGLE_AI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey"
-    );
-  }
-  return new GoogleGenAI({ apiKey });
-}
-
 async function callAssessment(
-  client: GoogleGenAI,
-  model: string,
   userPrompt: string,
+  config?: AIConfig,
 ): Promise<IntakeAssessment> {
-  const response = await client.models.generateContent({
-    model,
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: userPrompt }],
-      },
-    ],
-    config: {
-      systemInstruction: INTAKE_ASSESSMENT_PROMPT,
-      temperature: 0.3,
-      maxOutputTokens: 2048,
-      responseMimeType: "application/json",
-      responseSchema: assessmentSchema,
-    },
+  const provider = createProviderFromConfig(config);
+  const rawText = await provider.generate({
+    systemPrompt: INTAKE_ASSESSMENT_PROMPT,
+    userMessage: userPrompt,
+    maxOutputTokens: 2048,
+    temperature: resolveTemperature(config),
+    responseSchema: assessmentSchema,
   });
 
-  const text = response.text;
-  if (!text) throw new Error("Empty assessment response");
-
-  return JSON.parse(text);
+  return safeParseJSON<IntakeAssessment>(rawText);
 }
 
 export async function assessIntake(
   userPrompt: string,
+  config?: AIConfig,
 ): Promise<IntakeAssessment> {
-  const client = getClient();
-  const model = process.env.AI_MODEL || "gemini-2.5-flash";
-
   try {
-    return await callAssessment(client, model, userPrompt);
+    return await callAssessment(userPrompt, config);
   } catch (firstError) {
-    // Retry once on JSON parse failure (Gemini occasionally truncates)
     console.warn("[Unfog Intake] First attempt failed, retrying:", firstError);
-    return await callAssessment(client, model, userPrompt);
+    return await callAssessment(userPrompt, config);
   }
 }

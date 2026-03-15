@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exploreNode } from "@/lib/ai/explore-node";
-import type { ExploreRequest } from "@/types/analysis";
+import type { ExploreRequest, AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const body: ExploreRequest = await request.json();
+    const body = await request.json();
+    const aiConfig: AIConfig | undefined = body.aiConfig;
+    const exploreBody: ExploreRequest = body;
 
-    if (!body.nodeId || !body.nodeLabel) {
+    if (!exploreBody.nodeId || !exploreBody.nodeLabel) {
       return NextResponse.json(
         { error: "Missing node data" },
         { status: 400 }
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const startTime = Date.now();
-    const result = await exploreNode(body);
+    const result = await exploreNode(exploreBody, aiConfig);
     const duration = Date.now() - startTime;
 
     console.log(
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result,
       meta: {
-        model: process.env.AI_MODEL || "gemini-2.5-flash",
+        model: aiConfig?.model || process.env.AI_MODEL || "gemini-2.5-flash",
         durationMs: duration,
       },
     });
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const message = error instanceof Error ? error.message : "Unknown error";
 
-    if (message.includes("API_KEY")) {
+    if (message.includes("API_KEY") || message.includes("api_key") || message.includes("authentication")) {
       return NextResponse.json(
         { error: "AI service not configured." },
         { status: 503 }

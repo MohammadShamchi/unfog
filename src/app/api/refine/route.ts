@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { refineProblem } from "@/lib/ai/refine-problem";
 import { formatEditHistory } from "@/lib/format-edit-history";
 import type { EditEvent } from "@/types/canvas";
+import type { AIConfig } from "@/types/analysis";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const aiConfig: AIConfig | undefined = body.aiConfig;
 
     if (!body.originalPrompt || typeof body.originalPrompt !== "string") {
       return NextResponse.json(
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
       currentNodes: body.currentNodes,
       currentEdges: body.currentEdges || [],
       editSummary,
-    });
+    }, aiConfig);
     const duration = Date.now() - startTime;
 
     console.log(
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result,
       meta: {
-        model: process.env.AI_MODEL || "gemini-2.5-flash",
+        model: aiConfig?.model || process.env.AI_MODEL || "gemini-2.5-flash",
         durationMs: duration,
       },
     });
@@ -55,14 +57,14 @@ export async function POST(request: NextRequest) {
     const message =
       error instanceof Error ? error.message : "Unknown error";
 
-    if (message.includes("API_KEY")) {
+    if (message.includes("API_KEY") || message.includes("api_key") || message.includes("authentication")) {
       return NextResponse.json(
         { error: "AI service not configured. Check your API key." },
         { status: 503 }
       );
     }
 
-    if (message.includes("quota") || message.includes("rate")) {
+    if (message.includes("quota") || message.includes("rate") || message.includes("429")) {
       return NextResponse.json(
         { error: "AI service rate limited. Try again in a moment." },
         { status: 429 }

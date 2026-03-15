@@ -17,6 +17,7 @@ const SHORTCUTS = [
   { key: "F", action: "Focus on selected branch" },
   { key: "Escape", action: "Exit focus mode" },
   { key: "?", action: "Show shortcuts" },
+  { key: "⌘ ,", action: "AI Settings" },
 ];
 
 export function ShortcutsModal({ open, onClose }: ShortcutsModalProps) {

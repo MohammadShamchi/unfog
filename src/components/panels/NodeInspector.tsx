@@ -10,7 +10,7 @@ import { NODE_COLORS, NODE_TYPE_LABELS } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 import { ConnectionsList } from "./ConnectionsList";
 import { CanvasChat } from "./CanvasChat";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { apiPostWithRetry } from "@/lib/api-client";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
 const NODE_TYPES: NodeType[] = ["problem", "cause", "solution", "context"];
@@ -61,18 +61,14 @@ export function NodeInspector() {
         label: typeof e.label === "string" ? e.label : undefined,
       }));
 
-      const res = await fetchWithRetry("/api/explore", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nodeId: selectedNodeId,
-          nodeLabel: node.data.label,
-          nodeDescription: node.data.description,
-          nodeType: node.data.nodeType,
-          originalPrompt,
-          currentNodes,
-          currentEdges,
-        }),
+      const res = await apiPostWithRetry("/api/explore", {
+        nodeId: selectedNodeId,
+        nodeLabel: node.data.label,
+        nodeDescription: node.data.description,
+        nodeType: node.data.nodeType,
+        originalPrompt,
+        currentNodes,
+        currentEdges,
       });
 
       const data = await res.json();

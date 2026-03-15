@@ -7,7 +7,7 @@ import { useHistoryStore } from "@/stores/history-store";
 import { useIntakeStore } from "@/stores/intake-store";
 import { buildEnrichedPrompt } from "@/lib/ai/prompts";
 import { soundEngine } from "@/lib/sound/sound-engine";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { apiPostWithRetry } from "@/lib/api-client";
 import type { IntakeAnswer } from "@/types/analysis";
 
 export function useIntakeHandler() {
@@ -15,11 +15,7 @@ export function useIntakeHandler() {
     useCanvasStore.getState().setLoading(true);
     soundEngine.playAiStart();
     try {
-      const res = await fetchWithRetry("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
+      const res = await apiPostWithRetry("/api/analyze", { prompt: finalPrompt });
       const data = await res.json();
 
       if (!res.ok) {
@@ -61,11 +57,7 @@ export function useIntakeHandler() {
     intakeStore.startAssessment();
     try {
       const enriched = buildEnrichedPrompt(activePrompt, rounds);
-      const assessRes = await fetchWithRetry("/api/assess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: enriched }),
-      });
+      const assessRes = await apiPostWithRetry("/api/assess", { prompt: enriched });
       const assessData = await assessRes.json();
 
       if (assessData.success && !assessData.data.sufficient && assessData.data.questions?.length) {
@@ -93,11 +85,7 @@ export function useIntakeHandler() {
     intakeStore.startAssessment();
 
     try {
-      const assessRes = await fetchWithRetry("/api/assess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text.trim() }),
-      });
+      const assessRes = await apiPostWithRetry("/api/assess", { prompt: text.trim() });
       const assessData = await assessRes.json();
 
       if (assessData.success && !assessData.data.sufficient && assessData.data.questions?.length) {

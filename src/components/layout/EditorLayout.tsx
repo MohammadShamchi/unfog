@@ -7,6 +7,7 @@ import { PromptPanel, PromptPanelContent } from "../panels/PromptPanel";
 import { MobilePromptDrawer } from "../panels/MobilePromptDrawer";
 import { ProblemCanvas } from "../canvas/ProblemCanvas";
 import { ShortcutsModal } from "../ui/shortcuts-modal";
+import { SettingsModal } from "../ui/settings-modal";
 import { useSoundStore } from "@/stores/sound-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
@@ -18,6 +19,7 @@ export function EditorLayout() {
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Auto-init AudioContext on first user interaction
   useEffect(() => {
@@ -44,7 +46,7 @@ export function EditorLayout() {
   useSoundEffects();
 
   // Keyboard shortcuts
-  useKeyboardShortcuts(() => setShowShortcuts(true));
+  useKeyboardShortcuts(() => setShowShortcuts(true), () => setShowSettings(true));
 
   const nodes = useCanvasStore((s) => s.nodes);
   const isLoading = useCanvasStore((s) => s.isLoading);
@@ -55,6 +57,7 @@ export function EditorLayout() {
       <Header
         isMobile={isMobile}
         onTogglePrompt={() => setDrawerOpen((v) => !v)}
+        onOpenSettings={() => setShowSettings(true)}
       />
       <div className="flex flex-1 overflow-hidden">
         <AnimatePresence>
@@ -83,6 +86,7 @@ export function EditorLayout() {
       )}
 
       <ShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 }

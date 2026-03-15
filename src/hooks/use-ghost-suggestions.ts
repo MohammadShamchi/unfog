@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useGhostStore } from "@/stores/ghost-store";
+import { apiPost } from "@/lib/api-client";
 
 export function useGhostSuggestions() {
   const nodes = useCanvasStore((s) => s.nodes);
@@ -40,15 +41,11 @@ export function useGhostSuggestions() {
           label: typeof e.label === "string" ? e.label : undefined,
         }));
 
-        const res = await fetch("/api/suggest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            originalPrompt,
-            currentNodes,
-            currentEdges,
-            dismissedTopics: ghostState.dismissedTopics,
-          }),
+        const res = await apiPost("/api/suggest", {
+          originalPrompt,
+          currentNodes,
+          currentEdges,
+          dismissedTopics: ghostState.dismissedTopics,
         });
 
         if (res.ok) {
