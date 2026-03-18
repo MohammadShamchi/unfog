@@ -33,7 +33,7 @@ function IdeaNodeComponent({ id, data, selected }: NodeProps<InsightNode>) {
   );
 
   const fillColor = isDark ? SHAPE_FILL_DARK.idea : SHAPE_FILL_LIGHT.idea;
-  const hoverFill = isDark ? "rgba(95, 224, 193, 0.08)" : "rgba(95, 224, 193, 0.12)";
+  const hoverFill = isDark ? "rgba(232, 197, 71, 0.08)" : "rgba(232, 197, 71, 0.12)";
 
   const handleEditStart = useCallback(() => setIsEditing(true), [setIsEditing]);
   const handleEditEnd = useCallback(() => setIsEditing(false), [setIsEditing]);

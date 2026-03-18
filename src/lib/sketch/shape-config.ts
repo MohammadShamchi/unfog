@@ -18,25 +18,25 @@ export function getShapeDimensions(nodeType: NodeType): ShapeDimensions {
 }
 
 export const SHAPE_STROKE_COLORS: Record<NodeType, string> = {
-  problem: "#E07A5F",
-  cause: "#E07A5F",
-  idea: "#5FE0C1",
-  solution: "#5DCAA5",
-  context: "#7B8794",
+  problem: "#E85D5D",
+  cause: "#F0A04B",
+  idea: "#E8C547",
+  solution: "#4DD4B0",
+  context: "#7B8CDE",
 };
 
 export const SHAPE_FILL_DARK: Record<NodeType, string> = {
-  problem: "rgba(224, 122, 95, 0.04)",
-  cause: "rgba(224, 122, 95, 0.04)",
-  idea: "rgba(95, 224, 193, 0.04)",
-  solution: "rgba(93, 202, 165, 0.04)",
-  context: "rgba(123, 135, 148, 0.03)",
+  problem: "rgba(232, 93, 93, 0.04)",
+  cause: "rgba(240, 160, 75, 0.04)",
+  idea: "rgba(232, 197, 71, 0.04)",
+  solution: "rgba(77, 212, 176, 0.04)",
+  context: "rgba(123, 140, 222, 0.03)",
 };
 
 export const SHAPE_FILL_LIGHT: Record<NodeType, string> = {
-  problem: "rgba(224, 122, 95, 0.07)",
-  cause: "rgba(224, 122, 95, 0.07)",
-  idea: "rgba(95, 224, 193, 0.07)",
-  solution: "rgba(93, 202, 165, 0.07)",
-  context: "rgba(123, 135, 148, 0.06)",
+  problem: "rgba(232, 93, 93, 0.07)",
+  cause: "rgba(240, 160, 75, 0.07)",
+  idea: "rgba(232, 197, 71, 0.07)",
+  solution: "rgba(77, 212, 176, 0.07)",
+  context: "rgba(123, 140, 222, 0.06)",
 };
