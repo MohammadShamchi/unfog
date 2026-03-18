@@ -8,12 +8,17 @@ export function getAIConfig(): AIConfig | undefined {
   return store.getConfig();
 }
 
-export async function apiPost(url: string, body: Record<string, unknown>): Promise<Response> {
+export async function apiPost(
+  url: string,
+  body: Record<string, unknown>,
+  init?: { signal?: AbortSignal },
+): Promise<Response> {
   const aiConfig = getAIConfig();
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...body, aiConfig }),
+    signal: init?.signal,
   });
 }
 

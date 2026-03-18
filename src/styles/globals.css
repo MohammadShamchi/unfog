@@ -10,33 +10,56 @@
 
 /* ========== DESIGN TOKENS ========== */
 :root {
-  /* Backgrounds */
-  --bg-canvas: #0E1013;
-  --bg-surface: #16181D;
-  --bg-elevated: #1E2028;
-  --bg-hover: #252830;
+  /* Backgrounds - light mode */
+  --bg-canvas: #F7F7F5;
+  --bg-surface: #F0EFED;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: #E8E7E5;
+  --bg-active: #E0DFDD;
 
-  /* Accent */
-  --accent: #5FE0C1;
-  --accent-hover: #4BC5A8;
-  --accent-muted: rgba(95, 224, 193, 0.10);
-  --accent-glow: rgba(95, 224, 193, 0.20);
+  /* Accent - deeper teal for light backgrounds */
+  --accent: #2BA88A;
+  --accent-hover: #249A7E;
+  --accent-muted: rgba(43, 168, 138, 0.12);
+  --accent-glow: rgba(43, 168, 138, 0.20);
+  --accent-dim: rgba(43, 168, 138, 0.40);
 
-  /* Text */
-  --text-primary: #E8E8ED;
-  --text-secondary: #8B8D98;
-  --text-muted: #555664;
+  /* Text - dark on light */
+  --text-primary: #1A1C24;
+  --text-secondary: #6A6E7A;
+  --text-muted: #999999;
+  --text-inverse: #F7F7F5;
 
   /* Semantic Node Colors */
-  --node-problem: #EF4444;
-  --node-solution: #5FE0C1;
-  --node-cause: #F59E0B;
-  --node-context: #6366F1;
+  --node-problem: #E85D5D;
+  --node-solution: #4DD4B0;
+  --node-cause: #F0A04B;
+  --node-context: #7B8CDE;
+
+  /* Node badge colors - light */
+  --node-problem-badge-bg: #F5DDD8;
+  --node-problem-badge-text: #A04030;
+  --node-cause-badge-bg: #F8EDD8;
+  --node-cause-badge-text: #9A7020;
+  --node-solution-badge-bg: #E2F0E0;
+  --node-solution-badge-text: #3A7A36;
+  --node-context-badge-bg: #D8EAF5;
+  --node-context-badge-text: #2E6A98;
 
   /* Borders */
-  --border: #2A2C35;
-  --border-hover: #3A3C45;
-  --border-active: #5FE0C1;
+  --border: rgba(0, 0, 0, 0.15);
+  --border-hover: rgba(0, 0, 0, 0.25);
+  --border-active: #2BA88A;
+
+  /* Edge colors */
+  --edge-color: rgba(0, 0, 0, 0.22);
+  --edge-label-color: #6A6E7A;
+
+  /* Minimap */
+  --minimap-mask: rgba(247, 247, 245, 0.8);
+
+  /* Backdrop */
+  --backdrop: rgba(0, 0, 0, 0.3);
 
   /* Spacing */
   --sidebar-width: 320px;
@@ -64,78 +87,143 @@
   /* Fog */
   --fog-opacity: 0.42;
   --fog-reveal-duration: 180ms;
+  --node-glow-spread: 0px;
+
+  /* Dot Grid */
+  --dot-color: rgba(0, 0, 0, 0.08);
+  --dot-size: 1px;
+  --dot-gap: 24px;
+
+  /* shadcn bridge — light */
+  --background: #F7F7F5;
+  --foreground: #1A1C24;
+  --card: #FFFFFF;
+  --card-foreground: #1A1C24;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1C24;
+  --primary: #2BA88A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0EFED;
+  --secondary-foreground: #1A1C24;
+  --muted: #F0EFED;
+  --muted-foreground: #6A6E7A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #E85D5D;
+  --input: rgba(0, 0, 0, 0.15);
+  --ring: #2BA88A;
+  --radius: 10px;
+
+  /* shadcn sidebar — light */
+  --sidebar: #F0EFED;
+  --sidebar-foreground: #1A1C24;
+  --sidebar-primary: #2BA88A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFFFFF;
+  --sidebar-accent-foreground: #1A1C24;
+  --sidebar-border: rgba(0, 0, 0, 0.15);
+  --sidebar-ring: #2BA88A;
+
+  /* shadcn charts */
+  --chart-1: #2BA88A;
+  --chart-2: #7B8CDE;
+  --chart-3: #F0A04B;
+  --chart-4: #E85D5D;
+  --chart-5: #6A6E7A;
+}
+
+/* Dark mode */
+.dark {
+  /* Backgrounds - deeper, warmer darks */
+  --bg-canvas: #0B0D10;
+  --bg-surface: #15171C;
+  --bg-elevated: #1E2128;
+  --bg-hover: #252A33;
+  --bg-active: #2A303A;
+
+  /* Accent - desaturated teal for eye comfort */
+  --accent: #4DD4B0;
+  --accent-hover: #3EC09E;
+  --accent-muted: rgba(77, 212, 176, 0.15);
+  --accent-glow: rgba(77, 212, 176, 0.25);
+  --accent-dim: rgba(77, 212, 176, 0.40);
+
+  /* Text - slightly warmer whites */
+  --text-primary: #E8EAED;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  --text-inverse: #0B0D10;
+
+  /* Semantic Node Colors */
+  --node-problem: #E85D5D;
+  --node-solution: #4DD4B0;
+  --node-cause: #F0A04B;
+  --node-context: #7B8CDE;
+
+  /* Node badge colors - dark */
+  --node-problem-badge-bg: rgba(232, 93, 93, 0.20);
+  --node-problem-badge-text: #E85D5D;
+  --node-cause-badge-bg: rgba(240, 160, 75, 0.20);
+  --node-cause-badge-text: #F0A04B;
+  --node-solution-badge-bg: rgba(77, 212, 176, 0.20);
+  --node-solution-badge-text: #4DD4B0;
+  --node-context-badge-bg: rgba(123, 140, 222, 0.20);
+  --node-context-badge-text: #7B8CDE;
+
+  /* Borders */
+  --border: #2A303A;
+  --border-hover: #3A4250;
+  --border-active: #4DD4B0;
+
+  /* Edge colors */
+  --edge-color: #2A303A;
+  --edge-label-color: #9CA3AF;
+
+  /* Minimap */
+  --minimap-mask: rgba(14, 16, 19, 0.8);
+
+  /* Backdrop */
+  --backdrop: rgba(0, 0, 0, 0.6);
+
+  /* Fog */
   --node-glow-spread: 16px;
 
   /* Dot Grid */
   --dot-color: rgba(255, 255, 255, 0.07);
-  --dot-size: 1px;
-  --dot-gap: 24px;
 
-  /* shadcn bridge — dark always */
-  --background: #0E1013;
-  --foreground: #E8E8ED;
-  --card: #16181D;
-  --card-foreground: #E8E8ED;
-  --popover: #16181D;
-  --popover-foreground: #E8E8ED;
-  --primary: #5FE0C1;
-  --primary-foreground: #0E1013;
-  --secondary: #1E2028;
-  --secondary-foreground: #E8E8ED;
-  --muted: #1E2028;
-  --muted-foreground: #8B8D98;
-  --accent-foreground: #0E1013;
-  --destructive: #EF4444;
-  --input: #2A2C35;
-  --ring: #5FE0C1;
-  --radius: 10px;
+  /* shadcn bridge — dark */
+  --background: #0B0D10;
+  --foreground: #E8EAED;
+  --card: #15171C;
+  --card-foreground: #E8EAED;
+  --popover: #15171C;
+  --popover-foreground: #E8EAED;
+  --primary: #4DD4B0;
+  --primary-foreground: #0B0D10;
+  --secondary: #1E2128;
+  --secondary-foreground: #E8EAED;
+  --muted: #1E2128;
+  --muted-foreground: #9CA3AF;
+  --accent-foreground: #0B0D10;
+  --destructive: #E85D5D;
+  --input: #2A303A;
+  --ring: #4DD4B0;
 
-  /* shadcn sidebar */
-  --sidebar: #16181D;
-  --sidebar-foreground: #E8E8ED;
-  --sidebar-primary: #5FE0C1;
-  --sidebar-primary-foreground: #0E1013;
-  --sidebar-accent: #1E2028;
-  --sidebar-accent-foreground: #E8E8ED;
-  --sidebar-border: #2A2C35;
-  --sidebar-ring: #5FE0C1;
+  /* shadcn sidebar — dark */
+  --sidebar: #15171C;
+  --sidebar-foreground: #E8EAED;
+  --sidebar-primary: #4DD4B0;
+  --sidebar-primary-foreground: #0B0D10;
+  --sidebar-accent: #1E2128;
+  --sidebar-accent-foreground: #E8EAED;
+  --sidebar-border: #2A303A;
+  --sidebar-ring: #4DD4B0;
 
-  /* shadcn charts */
-  --chart-1: #5FE0C1;
-  --chart-2: #6366F1;
-  --chart-3: #F59E0B;
-  --chart-4: #EF4444;
-  --chart-5: #8B8D98;
-}
-
-/* Dark class uses same values (always dark) */
-.dark {
-  --background: #0E1013;
-  --foreground: #E8E8ED;
-  --card: #16181D;
-  --card-foreground: #E8E8ED;
-  --popover: #16181D;
-  --popover-foreground: #E8E8ED;
-  --primary: #5FE0C1;
-  --primary-foreground: #0E1013;
-  --secondary: #1E2028;
-  --secondary-foreground: #E8E8ED;
-  --muted: #1E2028;
-  --muted-foreground: #8B8D98;
-  --accent: #5FE0C1;
-  --accent-foreground: #0E1013;
-  --destructive: #EF4444;
-  --border: #2A2C35;
-  --input: #2A2C35;
-  --ring: #5FE0C1;
-  --sidebar: #16181D;
-  --sidebar-foreground: #E8E8ED;
-  --sidebar-primary: #5FE0C1;
-  --sidebar-primary-foreground: #0E1013;
-  --sidebar-accent: #1E2028;
-  --sidebar-accent-foreground: #E8E8ED;
-  --sidebar-border: #2A2C35;
-  --sidebar-ring: #5FE0C1;
+  /* shadcn charts — dark */
+  --chart-1: #4DD4B0;
+  --chart-2: #7B8CDE;
+  --chart-3: #F0A04B;
+  --chart-4: #E85D5D;
+  --chart-5: #9CA3AF;
 }
 
 /* ========== TAILWIND THEME ========== */
@@ -176,23 +264,25 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* Custom colors */
-  --color-canvas: #0E1013;
-  --color-surface: #16181D;
-  --color-elevated: #1E2028;
-  --color-surface-hover: #252830;
-  --color-accent-hover: #4BC5A8;
-  --color-accent-muted: rgba(95, 224, 193, 0.10);
-  --color-accent-glow: rgba(95, 224, 193, 0.20);
-  --color-text-primary: #E8E8ED;
-  --color-text-secondary: #8B8D98;
-  --color-text-muted: #555664;
-  --color-node-problem: #EF4444;
-  --color-node-solution: #5FE0C1;
-  --color-node-cause: #F59E0B;
-  --color-node-context: #6366F1;
-  --color-border-hover: #3A3C45;
-  --color-border-active: #5FE0C1;
+  /* Custom colors - reference CSS vars for theme reactivity */
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-surface-hover: var(--bg-hover);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-dim: var(--accent-dim);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-node-problem: var(--node-problem);
+  --color-node-solution: var(--node-solution);
+  --color-node-cause: var(--node-cause);
+  --color-node-context: var(--node-context);
+  --color-border-hover: var(--border-hover);
+  --color-border-active: var(--border-active);
 
   /* Radii — direct values to avoid self-reference */
   --radius-sm: 6px;
@@ -232,7 +322,7 @@
 }
 
 .react-flow__edge-path {
-  stroke: var(--border) !important;
+  stroke: var(--edge-color) !important;
   stroke-width: 1.5px;
 }
 

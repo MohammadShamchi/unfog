@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { Brain, Sparkles, RefreshCw } from "lucide-react";
+import { NODE_BADGE_STYLES } from "@/types/canvas";
+import type { NodeType } from "@/types/analysis";
 
 function DemoNode({
   type,
   label,
   description,
-  color,
+  nodeType,
 }: {
   type: string;
   label: string;
   description: string;
-  color: string;
+  nodeType: NodeType;
 }) {
+  const badge = NODE_BADGE_STYLES[nodeType];
+
   return (
     <div
       className="rounded-md border px-3 py-2.5 min-w-[180px] max-w-[220px]"
@@ -19,12 +23,12 @@ function DemoNode({
         backgroundColor: "var(--bg-elevated)",
         borderColor: "var(--border)",
         borderLeftWidth: 3,
-        borderLeftColor: color,
+        borderLeftColor: badge.text,
       }}
     >
       <span
         className="inline-block rounded-sm px-1.5 py-0.5 text-[9px] font-display font-semibold uppercase tracking-wider mb-1"
-        style={{ backgroundColor: `${color}20`, color }}
+        style={{ backgroundColor: badge.bg, color: badge.text }}
       >
         {type}
       </span>
@@ -119,27 +123,27 @@ export function LandingPage() {
             type="Problem"
             label="Revenue declining"
             description="Sales down 20% quarter over quarter"
-            color="#EF4444"
+            nodeType="problem"
           />
           <div className="flex flex-col gap-4 pt-8">
             <DemoNode
               type="Cause"
               label="Slow product delivery"
               description="Engineering bottleneck on key features"
-              color="#F59E0B"
+              nodeType="cause"
             />
             <DemoNode
               type="Cause"
               label="High team turnover"
               description="Lost 3 senior engineers in Q4"
-              color="#F59E0B"
+              nodeType="cause"
             />
           </div>
           <DemoNode
             type="Solution"
             label="Hire tech lead"
             description="Dedicated hire to unblock delivery pipeline"
-            color="#5FE0C1"
+            nodeType="solution"
           />
         </div>
       </section>

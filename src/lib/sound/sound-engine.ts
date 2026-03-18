@@ -157,6 +157,18 @@ export const soundEngine = {
     setTimeout(() => synth.dispose(), 200);
   },
 
+  // Options ready: gentle two-note chord (branching paths)
+  playOptionsReady() {
+    if (!isReady()) return;
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.02 },
+      volume: -8,
+    }).toDestination();
+    synth.triggerAttackRelease(["C4", "G4"], "100ms");
+    setTimeout(() => synth.dispose(), 250);
+  },
+
   // Spec 16: Ghost dismiss
   playGhostDismiss() {
     if (!isReady()) return;

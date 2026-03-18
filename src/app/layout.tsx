@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import "@fontsource-variable/jetbrains-mono";
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Unfog — Dump your thoughts. See them clearly.",
@@ -28,10 +29,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        {children}
-        <Toaster position="bottom-right" />
+        <ThemeProvider>
+          {children}
+          <Toaster position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

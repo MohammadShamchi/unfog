@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff, X, Settings } from "lucide-react";
+import { Volume2, VolumeX, Download, Upload, FilePlus, MessageSquare, Cloud, CloudOff, X, Settings, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSoundStore } from "@/stores/sound-store";
@@ -18,6 +19,7 @@ interface HeaderProps {
 }
 
 export function Header({ isMobile, onTogglePrompt, onOpenSettings }: HeaderProps) {
+  const { resolvedTheme, setTheme } = useTheme();
   const soundEnabled = useSoundStore((s) => s.enabled);
   const soundInit = useSoundStore((s) => s.init);
   const soundToggle = useSoundStore((s) => s.toggle);
@@ -189,6 +191,17 @@ export function Header({ isMobile, onTogglePrompt, onOpenSettings }: HeaderProps
               {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </TooltipTrigger>
             <TooltipContent>{soundEnabled ? "Mute sounds" : "Enable sounds"}</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              className="rounded-sm p-1.5 text-text-secondary transition-colors duration-[120ms] hover:bg-hover hover:text-text-primary"
+              aria-label="Toggle theme"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            >
+              {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </TooltipTrigger>
+            <TooltipContent>{resolvedTheme === "dark" ? "Light mode" : "Dark mode"}</TooltipContent>
           </Tooltip>
 
           <Tooltip>

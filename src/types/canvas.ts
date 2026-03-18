@@ -12,10 +12,24 @@ export type InsightNode = Node<InsightNodeData, "insight">;
 export type InsightEdge = Edge;
 
 export const NODE_COLORS: Record<NodeType, string> = {
-  problem: "#EF4444",
-  cause: "#F59E0B",
-  solution: "#5FE0C1",
-  context: "#6366F1",
+  problem: "#E85D5D",   // Muted coral-red
+  cause: "#F0A04B",     // Warmer amber
+  solution: "#4DD4B0",  // Desaturated teal
+  context: "#7B8CDE",   // Softer indigo
+};
+
+export const NODE_COLORS_MUTED: Record<NodeType, string> = {
+  problem: "rgba(232, 93, 93, 0.15)",
+  cause: "rgba(240, 160, 75, 0.15)",
+  solution: "rgba(77, 212, 176, 0.15)",
+  context: "rgba(123, 140, 222, 0.15)",
+};
+
+export const NODE_BADGE_STYLES: Record<NodeType, { bg: string; text: string }> = {
+  problem:  { bg: "var(--node-problem-badge-bg)",  text: "var(--node-problem-badge-text)" },
+  cause:    { bg: "var(--node-cause-badge-bg)",     text: "var(--node-cause-badge-text)" },
+  solution: { bg: "var(--node-solution-badge-bg)",  text: "var(--node-solution-badge-text)" },
+  context:  { bg: "var(--node-context-badge-bg)",   text: "var(--node-context-badge-text)" },
 };
 
 export const NODE_TYPE_LABELS: Record<NodeType, string> = {

@@ -149,6 +149,31 @@ OUTPUT FORMAT:
   ]
 }`;
 
+export const OPTIONS_SYSTEM_PROMPT = `You are an expert problem analyst. The user has selected a specific node in their problem map. Your job is to generate 2-3 alternative approaches or perspectives for this node, plus 1 risk/downside per alternative.
+
+RULES:
+1. Respond in the SAME language as the existing node labels.
+2. Generate 2-3 alternatives (sentiment: "positive"). These are different ways to approach or think about the selected node.
+3. For each alternative, generate exactly 1 risk or downside (sentiment: "negative", with parentOptionId pointing to that alternative's ID).
+4. Node labels must be short: 3-6 words maximum.
+5. Descriptions must be 1-2 sentences maximum.
+6. IDs: "opt_1", "opt_2", "opt_3" for alternatives; "opt_1_risk", "opt_2_risk", "opt_3_risk" for risks.
+7. Edges: selected node → each alternative, each alternative → its risk.
+8. Use appropriate node types: alternatives are typically "solution" type, risks are typically "problem" type.
+9. Do NOT duplicate ideas already present in the map.
+
+OUTPUT FORMAT:
+{
+  "options": [
+    { "id": "opt_1", "type": "solution", "label": "Short title", "description": "Brief explanation", "sentiment": "positive" },
+    { "id": "opt_1_risk", "type": "problem", "label": "Risk title", "description": "Brief risk explanation", "sentiment": "negative", "parentOptionId": "opt_1" }
+  ],
+  "edges": [
+    { "source": "parent_id", "target": "opt_1" },
+    { "source": "opt_1", "target": "opt_1_risk" }
+  ]
+}`;
+
 import type { IntakeRound } from "@/types/analysis";
 
 export const INTAKE_ASSESSMENT_PROMPT = `You are an expert problem analyst preparing to create a visual clarity map. 

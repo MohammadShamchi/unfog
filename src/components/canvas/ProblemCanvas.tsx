@@ -174,7 +174,7 @@ function CanvasInner() {
     () => ({
       type: "smoothstep" as const,
       style: {
-        stroke: "var(--border)",
+        stroke: "var(--edge-color)",
         strokeWidth: 1.5,
         opacity: isFogged ? 0.3 : 1,
         transition: "opacity 0.4s",
@@ -224,7 +224,7 @@ function CanvasInner() {
           <MiniMap
             position="bottom-left"
             nodeColor={miniMapNodeColor}
-            maskColor="rgba(14, 16, 19, 0.8)"
+            maskColor="var(--minimap-mask)"
             style={{
               backgroundColor: "var(--bg-surface)",
               border: "1px solid var(--border)",

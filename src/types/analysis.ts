@@ -166,3 +166,24 @@ export interface SuggestGhostsRequest {
 export interface SuggestGhostsResponse {
   suggestions: GhostSuggestion[];
 }
+
+// ─── Auto-options (alternatives + risks) ───
+export interface OptionNode extends AnalysisNode {
+  sentiment: "positive" | "negative";
+  parentOptionId?: string;
+}
+
+export interface OptionsRequest {
+  nodeId: string;
+  nodeLabel: string;
+  nodeDescription: string;
+  nodeType: NodeType;
+  originalPrompt: string;
+  currentNodes: AnalysisNode[];
+  currentEdges: AnalysisEdge[];
+}
+
+export interface OptionsResponse {
+  options: OptionNode[];
+  edges: AnalysisEdge[];
+}

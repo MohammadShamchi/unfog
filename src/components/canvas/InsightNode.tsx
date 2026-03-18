@@ -5,23 +5,24 @@ import { Handle, Position, useStore, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
 import type { InsightNode as InsightNodeType } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
-import { NODE_COLORS } from "@/types/canvas";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useFocusStore } from "@/stores/focus-store";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useFloatingMotion } from "@/hooks/use-floating-motion";
+import { useIsDark } from "@/hooks/use-is-dark";
+import { getNodeGlow } from "@/lib/theme/node-styles";
 import { EditableText } from "./EditableText";
 import { TypeBadge } from "./TypeBadge";
 import { NodeToolbar } from "./NodeToolbar";
 
 function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
-  const color = NODE_COLORS[data.nodeType];
   const reducedMotion = useReducedMotion();
   const delay = data.animationDelay ?? 0;
   const isFogged = useCanvasStore((s) => s.isFogged);
   const focusedNodeId = useFocusStore((s) => s.focusedNodeId);
   const branchNodeIds = useFocusStore((s) => s.branchNodeIds);
+  const isDark = useIsDark();
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +33,6 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
 
   const revealed = !isFogged || isHovered || isEditing;
 
-  // Spec 17: Focus mode
   const isFocusActive = focusedNodeId !== null;
   const isInBranch = branchNodeIds.includes(id);
   const isFocusedNode = focusedNodeId === id;
@@ -65,16 +65,16 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
 
   const entryDuration = reducedMotion ? 0 : 0.35;
 
-  const focusGlow = isFocusedNode
-    ? `0 0 24px 6px ${color}30, 0 0 8px 3px var(--accent-glow)`
-    : undefined;
+  const glowShadow = getNodeGlow(
+    data.nodeType,
+    { isHovered, isFocused: isFocusedNode },
+    isDark,
+  );
 
-  const glowShadow = focusGlow
-    ?? (isHovered
-      ? `0 0 20px 4px ${color}25, 0 0 6px 2px ${color}18`
-      : `0 0 var(--node-glow-spread) 2px ${color}15, 0 0 4px 1px ${color}10`);
+  const topBorderColor = isDark
+    ? `var(--node-${data.nodeType}-badge-text)40`
+    : `var(--node-${data.nodeType}-badge-text)30`;
 
-  // Compute target opacity
   const targetOpacity = isDimmed ? 0.15 : revealed ? 1 : 0.42;
 
   return (
@@ -84,7 +84,7 @@ function InsightNodeComponent({ id, data }: NodeProps<InsightNodeType>) {
         backgroundColor: "var(--bg-elevated)",
         borderWidth: "2px 1px 1px 1px",
         borderStyle: "solid",
-        borderTopColor: `${color}40`,
+        borderTopColor: topBorderColor,
         borderRightColor: isHovered ? "var(--border-hover)" : "var(--border)",
         borderBottomColor: isHovered ? "var(--border-hover)" : "var(--border)",
         borderLeftColor: isHovered ? "var(--border-hover)" : "var(--border)",

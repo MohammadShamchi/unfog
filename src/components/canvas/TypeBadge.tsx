@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NODE_COLORS, NODE_TYPE_LABELS } from "@/types/canvas";
+import { NODE_COLORS, NODE_BADGE_STYLES, NODE_TYPE_LABELS } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 
 interface TypeBadgeProps {
@@ -17,15 +17,15 @@ interface TypeBadgeProps {
 const NODE_TYPES: NodeType[] = ["problem", "cause", "solution", "context"];
 
 export function TypeBadge({ nodeType, onChange }: TypeBadgeProps) {
-  const color = NODE_COLORS[nodeType];
+  const badge = NODE_BADGE_STYLES[nodeType];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-display font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
         style={{
-          backgroundColor: `${color}20`,
-          color: color,
+          backgroundColor: badge.bg,
+          color: badge.text,
         }}
         onClick={(e) => e.stopPropagation()}
       >

@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
-import { NODE_COLORS, NODE_TYPE_LABELS } from "@/types/canvas";
+import { NODE_BADGE_STYLES, NODE_TYPE_LABELS } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 import { useGhostStore } from "@/stores/ghost-store";
 
@@ -21,7 +21,7 @@ interface GhostNodeProps {
 }
 
 function GhostNodeComponent({ data }: GhostNodeProps) {
-  const color = NODE_COLORS[data.nodeType];
+  const badge = NODE_BADGE_STYLES[data.nodeType];
   const acceptGhost = useGhostStore((s) => s.acceptGhost);
   const dismissGhost = useGhostStore((s) => s.dismissGhost);
 
@@ -32,7 +32,7 @@ function GhostNodeComponent({ data }: GhostNodeProps) {
         backgroundColor: "var(--bg-elevated)",
         borderWidth: "2px 1px 1px 1px",
         borderStyle: "dashed",
-        borderTopColor: `${color}30`,
+        borderTopColor: badge.text,
         borderRightColor: "var(--border)",
         borderBottomColor: "var(--border)",
         borderLeftColor: "var(--border)",
@@ -51,8 +51,8 @@ function GhostNodeComponent({ data }: GhostNodeProps) {
         <span
           className="inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-display font-semibold uppercase tracking-wider opacity-50"
           style={{
-            backgroundColor: `${color}15`,
-            color: color,
+            backgroundColor: badge.bg,
+            color: badge.text,
           }}
         >
           {NODE_TYPE_LABELS[data.nodeType]}
