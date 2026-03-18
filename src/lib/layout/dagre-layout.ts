@@ -1,9 +1,12 @@
 import dagre from "@dagrejs/dagre";
-import type { AnalysisResponse, AnalysisNode } from "@/types/analysis";
-import type { InsightNode, InsightEdge } from "@/types/canvas";
+import type { AnalysisResponse, AnalysisNode, NodeType } from "@/types/analysis";
+import type { InsightNode, InsightEdge, ShapeType } from "@/types/canvas";
+import { getShapeDimensions } from "@/lib/sketch/shape-config";
 
-const NODE_WIDTH = 260;
-const NODE_HEIGHT = 100;
+function dimFor(nodeType: NodeType) {
+  const d = getShapeDimensions(nodeType);
+  return { width: d.width, height: d.height };
+}
 
 export function layoutAnalysis(analysis: AnalysisResponse): {
   nodes: InsightNode[];
@@ -11,10 +14,11 @@ export function layoutAnalysis(analysis: AnalysisResponse): {
 } {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 100 });
 
   for (const node of analysis.nodes) {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+    const { width, height } = dimFor(node.type);
+    g.setNode(node.id, { width, height });
   }
 
   for (const edge of analysis.edges) {
@@ -25,12 +29,13 @@ export function layoutAnalysis(analysis: AnalysisResponse): {
 
   const nodes: InsightNode[] = analysis.nodes.map((node, index) => {
     const pos = g.node(node.id);
+    const { width, height } = dimFor(node.type);
     return {
       id: node.id,
-      type: "insight",
+      type: node.type as ShapeType,
       position: {
-        x: pos.x - NODE_WIDTH / 2,
-        y: pos.y - NODE_HEIGHT / 2,
+        x: pos.x - width / 2,
+        y: pos.y - height / 2,
       },
       data: {
         label: node.label,
@@ -69,10 +74,11 @@ export function layoutAnalysisAsSketch(analysis: AnalysisResponse): {
 } {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 100 });
 
   for (const node of analysis.nodes) {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+    const { width, height } = dimFor(node.type);
+    g.setNode(node.id, { width, height });
   }
   for (const edge of analysis.edges) {
     g.setEdge(edge.source, edge.target);
@@ -82,14 +88,16 @@ export function layoutAnalysisAsSketch(analysis: AnalysisResponse): {
   // Group by type for staggered delays
   const typeBaseDelay: Record<string, number> = {
     problem: 0,
-    context: 1.2,
     cause: 0.8,
+    idea: 1.0,
+    context: 1.2,
     solution: 1.6,
   };
   const typeCounters: Record<string, number> = {};
 
   const nodes = analysis.nodes.map((node) => {
     const pos = g.node(node.id);
+    const { width, height } = dimFor(node.type);
     const base = typeBaseDelay[node.type] ?? 0;
     const count = typeCounters[node.type] ?? 0;
     typeCounters[node.type] = count + 1;
@@ -98,8 +106,8 @@ export function layoutAnalysisAsSketch(analysis: AnalysisResponse): {
       id: node.id,
       type: "sketch" as const,
       position: {
-        x: pos.x - NODE_WIDTH / 2,
-        y: pos.y - NODE_HEIGHT / 2,
+        x: pos.x - width / 2,
+        y: pos.y - height / 2,
       },
       data: {
         label: node.label,
@@ -129,21 +137,24 @@ export function layoutNewNodes(
 ): InsightNode[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 100 });
 
   // Add existing nodes with their current positions
   for (const node of existingNodes) {
+    const nodeType = node.data.nodeType;
+    const { width, height } = dimFor(nodeType);
     g.setNode(node.id, {
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT,
-      x: node.position.x + NODE_WIDTH / 2,
-      y: node.position.y + NODE_HEIGHT / 2,
+      width,
+      height,
+      x: node.position.x + width / 2,
+      y: node.position.y + height / 2,
     });
   }
 
   // Add new nodes (dagre will position them)
   for (const node of newAnalysisNodes) {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+    const { width, height } = dimFor(node.type);
+    g.setNode(node.id, { width, height });
   }
 
   // Add all edges
@@ -157,12 +168,13 @@ export function layoutNewNodes(
 
   return newAnalysisNodes.map((node, index) => {
     const pos = g.node(node.id);
+    const { width, height } = dimFor(node.type);
     return {
       id: node.id,
-      type: "insight" as const,
+      type: node.type as ShapeType,
       position: {
-        x: pos.x - NODE_WIDTH / 2,
-        y: pos.y - NODE_HEIGHT / 2,
+        x: pos.x - width / 2,
+        y: pos.y - height / 2,
       },
       data: {
         label: node.label,

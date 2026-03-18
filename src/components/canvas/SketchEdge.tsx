@@ -5,7 +5,7 @@ import {
   type EdgeProps,
   getBezierPath,
 } from "@xyflow/react";
-import { generateWobblyLine } from "@/lib/sketch/sketchy-paths";
+import { generateRoughLine } from "@/lib/sketch/rough-shapes";
 
 function SketchEdgeComponent({
   id,
@@ -30,7 +30,7 @@ function SketchEdgeComponent({
   const midX = (sourceX + targetX) / 2;
   const midY = (sourceY + targetY) / 2;
 
-  const wobblyPath = generateWobblyLine(
+  const roughPath = generateRoughLine(
     [
       [sourceX, sourceY],
       [midX, midY],
@@ -42,7 +42,7 @@ function SketchEdgeComponent({
   return (
     <g>
       <path
-        d={wobblyPath}
+        d={roughPath}
         fill="none"
         stroke="#3A3A3A"
         strokeWidth={1.5}

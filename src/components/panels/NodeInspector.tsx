@@ -14,7 +14,7 @@ import { ExploreResults } from "./ExploreResults";
 import { apiPost } from "@/lib/api-client";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
-const NODE_TYPES: NodeType[] = ["problem", "cause", "solution", "context"];
+const NODE_TYPES: NodeType[] = ["problem", "cause", "idea", "solution", "context"];
 
 export function NodeInspector() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);

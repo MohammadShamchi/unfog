@@ -30,7 +30,11 @@
       "Bash(grep:*)",
       "Bash(npm search:*)",
       "Bash(wc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(grep -E \"\\\\.\\(tsx\\)$\")",
+      "WebFetch(domain:api.github.com)",
+      "Bash(npm info:*)",
+      "Bash(node:*)"
     ]
   }
 }

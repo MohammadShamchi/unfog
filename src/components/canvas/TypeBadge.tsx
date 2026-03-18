@@ -14,7 +14,7 @@ interface TypeBadgeProps {
   onChange: (newType: NodeType) => void;
 }
 
-const NODE_TYPES: NodeType[] = ["problem", "cause", "solution", "context"];
+const NODE_TYPES: NodeType[] = ["problem", "cause", "idea", "solution", "context"];
 
 export function TypeBadge({ nodeType, onChange }: TypeBadgeProps) {
   const badge = NODE_BADGE_STYLES[nodeType];

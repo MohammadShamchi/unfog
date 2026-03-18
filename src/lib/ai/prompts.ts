@@ -11,6 +11,7 @@ RULES:
    - "cause": A root cause or underlying reason behind a problem
    - "solution": A recommended action, fix, or next step
    - "context": Background information, constraint, or note
+   - "idea": An exploratory thought, brainstorm, or possibility that needs validation ("maybe", "what if", "I could try")
 7. Edge labels are optional. Only add them if the relationship isn't obvious.
 8. IDs must be sequential: "node_1", "node_2", etc.
 9. Do NOT translate the user's words. If they write in Persian, all labels and descriptions must be in Persian.
@@ -65,7 +66,7 @@ RULES:
 4. Descriptions must be 1-2 sentences maximum.
 5. New node IDs must continue from the highest existing ID.
 6. Every new node must connect FROM the parent node (parent → child).
-7. Use appropriate types: problems, causes, solutions, or context.
+7. Use appropriate types: problems, causes, solutions, ideas, or context.
 8. Go deeper, not broader — break down the specific node, don't add unrelated topics.
 
 OUTPUT FORMAT:
@@ -132,7 +133,7 @@ RULES:
 5. The label should be a concise node title (3-6 words) if the user accepts.
 6. The description should be 1-2 sentences explaining the suggestion.
 7. connectTo must be an existing node ID that the suggestion relates to.
-8. Assign appropriate types: problem, cause, solution, or context.
+8. Assign appropriate types: problem, cause, solution, idea, or context.
 9. Do NOT suggest topics from the dismissed list.
 
 OUTPUT FORMAT:
@@ -162,7 +163,7 @@ RULES:
 6. Descriptions must be 1-2 sentences maximum.
 7. IDs: "opt_1", "opt_2", "opt_3" for alternatives; "opt_1_risk", "opt_2_risk", "opt_3_risk" for risks.
 8. Edges: selected node → each alternative, each alternative → its risk.
-9. Use appropriate node types: alternatives are typically "solution" type, risks are typically "problem" type.
+9. Use appropriate node types: alternatives are typically "solution" type, risks are typically "problem" type, speculative approaches are "idea" type.
 10. Do NOT duplicate ideas already present in the map.
 
 OUTPUT FORMAT:

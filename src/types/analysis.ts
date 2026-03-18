@@ -7,7 +7,7 @@ export interface AIConfig {
 }
 
 // ─── Node types that map to the visual system ───
-export type NodeType = "problem" | "cause" | "solution" | "context";
+export type NodeType = "problem" | "cause" | "solution" | "context" | "idea";
 
 // ─── What the AI returns ───
 export interface AnalysisNode {

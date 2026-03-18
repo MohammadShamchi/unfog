@@ -4,33 +4,38 @@ import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
 import {
-  generateCloudPath,
-  generateCirclePath,
-  generateRoundedRectPath,
-} from "@/lib/sketch/sketchy-paths";
+  generateRoughCloud,
+  generateRoughEllipse,
+  generateRoughRectangle,
+  generateRoughDiamond,
+  type RoughShapeResult,
+} from "@/lib/sketch/rough-shapes";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import type { SketchNodeData } from "@/types/canvas";
 import { SKETCH_COLORS } from "@/types/canvas";
-
-const NODE_W = 260;
-const NODE_H = 100;
+import { getShapeDimensions } from "@/lib/sketch/shape-config";
 
 function SketchNodeComponent({ id, data }: NodeProps) {
   const d = data as unknown as SketchNodeData;
   const reducedMotion = useReducedMotion();
   const color = SKETCH_COLORS[d.nodeType] ?? "#7B8794";
   const delay = d.animationDelay ?? 0;
+  const { width: NODE_W, height: NODE_H } = getShapeDimensions(d.nodeType);
 
-  const shapePath = useMemo(() => {
+  const shape: RoughShapeResult = useMemo(() => {
     switch (d.nodeType) {
       case "problem":
-        return generateCloudPath(NODE_W, NODE_H, id);
+      case "cause":
+        return generateRoughEllipse(NODE_W, NODE_H, id);
+      case "idea":
+        return generateRoughCloud(NODE_W, NODE_H, id);
       case "solution":
-        return generateCirclePath(NODE_W / 2, NODE_H / 2, Math.min(NODE_W, NODE_H) / 2 - 6, id);
+        return generateRoughDiamond(NODE_W, NODE_H, id);
+      case "context":
       default:
-        return generateRoundedRectPath(NODE_W, NODE_H, 12, id);
+        return generateRoughRectangle(NODE_W, NODE_H, id);
     }
-  }, [d.nodeType, id]);
+  }, [d.nodeType, id, NODE_W, NODE_H]);
 
   // Estimate path length for stroke-dashoffset animation
   const pathLength = 800;
@@ -48,23 +53,44 @@ function SketchNodeComponent({ id, data }: NodeProps) {
         width={NODE_W}
         height={NODE_H}
         viewBox={`0 0 ${NODE_W} ${NODE_H}`}
-        style={{ position: "absolute", top: 0, left: 0 }}
+        style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}
       >
-        <motion.path
-          d={shapePath}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={
-            reducedMotion
-              ? { strokeDashoffset: 0 }
-              : { strokeDasharray: pathLength, strokeDashoffset: pathLength }
-          }
-          animate={{ strokeDashoffset: 0 }}
-          transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        />
+        {d.nodeType === "context" ? (
+          shape.strokePaths.map((pathD, i) => (
+            <motion.path
+              key={i}
+              d={pathD}
+              fill="none"
+              stroke={color}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="8 4"
+              initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay, duration: 0.4, ease: "easeOut" }}
+            />
+          ))
+        ) : (
+          shape.strokePaths.map((pathD, i) => (
+            <motion.path
+              key={i}
+              d={pathD}
+              fill="none"
+              stroke={color}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={
+                reducedMotion
+                  ? { strokeDashoffset: 0 }
+                  : { strokeDasharray: pathLength, strokeDashoffset: pathLength }
+              }
+              animate={{ strokeDashoffset: 0 }}
+              transition={{ delay, duration: 0.6, ease: "easeOut" }}
+            />
+          ))
+        )}
       </svg>
 
       {/* Text label */}

@@ -13,7 +13,7 @@ const ghostSchema = {
           id: { type: "string" as const },
           type: {
             type: "string" as const,
-            enum: ["problem", "cause", "solution", "context"],
+            enum: ["problem", "cause", "solution", "context", "idea"],
           },
           questionText: { type: "string" as const },
           label: { type: "string" as const },

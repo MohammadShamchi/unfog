@@ -15,7 +15,7 @@ const analysisSchema = {
           id: { type: "string" as const },
           type: {
             type: "string" as const,
-            enum: ["problem", "cause", "solution", "context"],
+            enum: ["problem", "cause", "solution", "context", "idea"],
           },
           label: { type: "string" as const },
           description: { type: "string" as const },

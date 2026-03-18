@@ -56,16 +56,19 @@ export function importCanvas(json: unknown): {
     throw new Error("Invalid export format");
   }
 
-  const nodes: InsightNode[] = data.nodes.map((n) => ({
-    id: n.id,
-    type: "insight" as const,
-    position: n.position,
-    data: {
-      label: n.label,
-      description: n.description,
-      nodeType: n.type as import("@/types/analysis").NodeType,
-    },
-  }));
+  const nodes: InsightNode[] = data.nodes.map((n) => {
+    const nodeType = n.type as import("@/types/analysis").NodeType;
+    return {
+      id: n.id,
+      type: nodeType,
+      position: n.position,
+      data: {
+        label: n.label,
+        description: n.description,
+        nodeType,
+      },
+    };
+  });
 
   const edges: InsightEdge[] = data.edges.map((e, i) => ({
     id: `edge_import_${i}`,

@@ -35,6 +35,7 @@
   --node-solution: #4DD4B0;
   --node-cause: #F0A04B;
   --node-context: #7B8CDE;
+  --node-idea: #5FE0C1;
 
   /* Node badge colors - light */
   --node-problem-badge-bg: #F5DDD8;
@@ -45,6 +46,8 @@
   --node-solution-badge-text: #3A7A36;
   --node-context-badge-bg: #D8EAF5;
   --node-context-badge-text: #2E6A98;
+  --node-idea-badge-bg: #D8F5ED;
+  --node-idea-badge-text: #1A7A5A;
 
   /* Borders */
   --border: rgba(0, 0, 0, 0.15);
@@ -158,6 +161,7 @@
   --node-solution: #4DD4B0;
   --node-cause: #F0A04B;
   --node-context: #7B8CDE;
+  --node-idea: #5FE0C1;
 
   /* Node badge colors - dark */
   --node-problem-badge-bg: rgba(232, 93, 93, 0.20);
@@ -168,6 +172,8 @@
   --node-solution-badge-text: #4DD4B0;
   --node-context-badge-bg: rgba(123, 140, 222, 0.20);
   --node-context-badge-text: #7B8CDE;
+  --node-idea-badge-bg: rgba(95, 224, 193, 0.20);
+  --node-idea-badge-text: #5FE0C1;
 
   /* Borders */
   --border: #2A303A;
@@ -281,6 +287,7 @@
   --color-node-solution: var(--node-solution);
   --color-node-cause: var(--node-cause);
   --color-node-context: var(--node-context);
+  --color-node-idea: var(--node-idea);
   --color-border-hover: var(--border-hover);
   --color-border-active: var(--border-active);
 

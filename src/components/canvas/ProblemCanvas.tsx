@@ -20,8 +20,11 @@ import { DotGridBackground } from "./DotGridBackground";
 import { ThinkingOverlay } from "./ThinkingOverlay";
 import { SkeletonNodes } from "./SkeletonNodes";
 import { GhostNode } from "./GhostNode";
-import { LabeledEdge } from "./LabeledEdge";
-import { nodeTypes as insightNodeTypes } from "./InsightNode";
+import { ProblemNode } from "./nodes/ProblemNode";
+import { IdeaNode } from "./nodes/IdeaNode";
+import { SolutionNode } from "./nodes/SolutionNode";
+import { ContextNode } from "./nodes/ContextNode";
+import { SketchyEdge } from "./edges/SketchyEdge";
 import { sketchNodeTypes } from "./SketchNode";
 import { sketchEdgeTypes } from "./SketchEdge";
 import { InputExperience } from "../input/InputExperience";
@@ -35,8 +38,16 @@ import { NODE_COLORS } from "@/types/canvas";
 import type { InsightNode as InsightNodeType } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 
-const nodeTypes = { ...insightNodeTypes, ...sketchNodeTypes, ghost: GhostNode };
-const edgeTypes = { smoothstep: LabeledEdge, ...sketchEdgeTypes };
+const nodeTypes = {
+  problem: ProblemNode,
+  cause: ProblemNode,
+  idea: IdeaNode,
+  solution: SolutionNode,
+  context: ContextNode,
+  ...sketchNodeTypes,
+  ghost: GhostNode,
+};
+const edgeTypes = { smoothstep: SketchyEdge, ...sketchEdgeTypes };
 
 function CanvasInner() {
   const { nodes: canvasNodes, edges, onNodesChange, onEdgesChange } = useCanvasStore();

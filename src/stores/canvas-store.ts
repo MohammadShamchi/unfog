@@ -121,6 +121,7 @@ function applyOps(
       if (n.id !== update.id) return n;
       return {
         ...n,
+        ...(update.type !== undefined && { type: update.type }),
         data: {
           ...n.data,
           ...(update.label !== undefined && { label: update.label }),
@@ -306,7 +307,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     set({
       nodes: state.nodes.map((n) =>
-        n.id === nodeId ? { ...n, data: { ...n.data, nodeType: newType } } : n
+        n.id === nodeId ? { ...n, type: newType, data: { ...n.data, nodeType: newType } } : n
       ),
       editHistory: [
         ...state.editHistory,
@@ -327,7 +328,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const newId = getNextNodeId(state.nodes);
     const newNode: InsightNode = {
       id: newId,
-      type: "insight",
+      type: node.data.nodeType,
       position: { x: node.position.x + 40, y: node.position.y + 40 },
       data: { ...node.data, animationDelay: 0 },
     };
@@ -379,7 +380,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     const newNode: InsightNode = {
       id: newId,
-      type: "insight",
+      type: "context",
       position,
       data: {
         label: "New node",

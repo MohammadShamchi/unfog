@@ -8,7 +8,8 @@ export interface InsightNodeData extends Record<string, unknown> {
   animationDelay?: number;
 }
 
-export type InsightNode = Node<InsightNodeData, "insight">;
+export type ShapeType = "problem" | "cause" | "solution" | "context" | "idea";
+export type InsightNode = Node<InsightNodeData, ShapeType>;
 export type InsightEdge = Edge;
 
 export interface SketchNodeData extends Record<string, unknown> {
@@ -20,9 +21,10 @@ export interface SketchNodeData extends Record<string, unknown> {
 
 export const SKETCH_COLORS: Record<NodeType, string> = {
   problem: "#E07A5F",   // Warm terracotta
-  cause: "#7B8794",     // Muted slate
-  solution: "#5FE0C1",  // Teal
+  cause: "#E07A5F",     // Same as problem (circle shape)
+  solution: "#5DCAA5",  // Green
   context: "#7B8794",   // Muted slate
+  idea: "#5FE0C1",      // Teal
 };
 
 export const NODE_COLORS: Record<NodeType, string> = {
@@ -30,6 +32,7 @@ export const NODE_COLORS: Record<NodeType, string> = {
   cause: "#F0A04B",     // Warmer amber
   solution: "#4DD4B0",  // Desaturated teal
   context: "#7B8CDE",   // Softer indigo
+  idea: "#5FE0C1",      // Teal
 };
 
 export const NODE_COLORS_MUTED: Record<NodeType, string> = {
@@ -37,6 +40,7 @@ export const NODE_COLORS_MUTED: Record<NodeType, string> = {
   cause: "rgba(240, 160, 75, 0.15)",
   solution: "rgba(77, 212, 176, 0.15)",
   context: "rgba(123, 140, 222, 0.15)",
+  idea: "rgba(95, 224, 193, 0.15)",
 };
 
 export const NODE_BADGE_STYLES: Record<NodeType, { bg: string; text: string }> = {
@@ -44,6 +48,7 @@ export const NODE_BADGE_STYLES: Record<NodeType, { bg: string; text: string }> =
   cause:    { bg: "var(--node-cause-badge-bg)",     text: "var(--node-cause-badge-text)" },
   solution: { bg: "var(--node-solution-badge-bg)",  text: "var(--node-solution-badge-text)" },
   context:  { bg: "var(--node-context-badge-bg)",   text: "var(--node-context-badge-text)" },
+  idea:     { bg: "var(--node-idea-badge-bg)",      text: "var(--node-idea-badge-text)" },
 };
 
 export const NODE_TYPE_LABELS: Record<NodeType, string> = {
@@ -51,6 +56,7 @@ export const NODE_TYPE_LABELS: Record<NodeType, string> = {
   cause: "Cause",
   solution: "Solution",
   context: "Context",
+  idea: "Idea",
 };
 
 export type EditEvent =
