@@ -171,6 +171,8 @@ export interface SuggestGhostsResponse {
 export interface OptionNode extends AnalysisNode {
   sentiment: "positive" | "negative";
   parentOptionId?: string;
+  pros?: string[];
+  cons?: string[];
 }
 
 export interface OptionsRequest {

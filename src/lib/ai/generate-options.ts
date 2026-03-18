@@ -22,6 +22,14 @@ const optionsSchema = {
             enum: ["positive", "negative"],
           },
           parentOptionId: { type: "string" as const },
+          pros: {
+            type: "array" as const,
+            items: { type: "string" as const },
+          },
+          cons: {
+            type: "array" as const,
+            items: { type: "string" as const },
+          },
         },
         required: ["id", "type", "label", "description", "sentiment"],
       },

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Plus, X } from "lucide-react";
+import { Check, AlertTriangle, Plus, X } from "lucide-react";
 import { NODE_BADGE_STYLES, NODE_TYPE_LABELS } from "@/types/canvas";
 import type { OptionsResponse, OptionNode } from "@/types/analysis";
 
@@ -26,8 +26,10 @@ function SkeletonCard({ delay }: { delay: number }) {
     >
       <div className="mb-2.5 h-4 w-20 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
       <div className="mb-1.5 h-4 w-3/4 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
-      <div className="mb-1 h-3 w-full rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
-      <div className="h-3 w-2/3 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="mb-3 h-3 w-full rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="mb-1.5 h-3 w-1/2 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="mb-1.5 h-3 w-2/3 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+      <div className="h-3 w-1/3 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
     </motion.div>
   );
 }
@@ -46,6 +48,9 @@ function OptionCard({
   onDismiss: (id: string) => void;
 }) {
   const badge = NODE_BADGE_STYLES[option.type];
+  const pros = option.pros ?? [];
+  const cons = option.cons ?? [];
+  const hasProsOrCons = pros.length > 0 || cons.length > 0;
 
   return (
     <motion.div
@@ -92,8 +97,41 @@ function OptionCard({
           {option.description}
         </p>
 
-        {/* Risk section */}
-        {risk && (
+        {/* Pros & Cons */}
+        {hasProsOrCons && (
+          <div className="mt-2.5 flex flex-col gap-1.5">
+            {/* Pros */}
+            {pros.length > 0 && (
+              <div className="flex flex-col gap-1">
+                {pros.map((pro, i) => (
+                  <div key={i} className="flex items-start gap-1.5">
+                    <Check size={11} className="mt-[3px] shrink-0" style={{ color: "var(--accent)" }} />
+                    <span dir="auto" className="font-body text-[11px] leading-snug" style={{ color: "var(--accent)" }}>
+                      {pro}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Cons */}
+            {cons.length > 0 && (
+              <div className="flex flex-col gap-1">
+                {cons.map((con, i) => (
+                  <div key={i} className="flex items-start gap-1.5">
+                    <AlertTriangle size={11} className="mt-[3px] shrink-0" style={{ color: "rgba(248, 113, 113, 0.8)" }} />
+                    <span dir="auto" className="font-body text-[11px] leading-snug" style={{ color: "rgba(248, 113, 113, 0.7)" }}>
+                      {con}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Fallback: show risk node if no pros/cons arrays (backward compat) */}
+        {!hasProsOrCons && risk && (
           <>
             <div
               className="my-2.5 border-t"
@@ -154,7 +192,7 @@ export function ExploreResults({ results, isLoading, onAddToMap, onDismiss }: Ex
   if (!isLoading && positiveOptions.length === 0) return null;
 
   return (
-    <div className="mt-2.5 max-h-[320px] overflow-y-auto flex flex-col gap-2.5">
+    <div className="mt-2.5 max-h-[400px] overflow-y-auto flex flex-col gap-2.5">
       <AnimatePresence mode="popLayout">
         {isLoading && !results && (
           <>
