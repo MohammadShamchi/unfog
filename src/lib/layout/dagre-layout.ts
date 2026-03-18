@@ -52,6 +52,75 @@ export function layoutAnalysis(analysis: AnalysisResponse): {
   return { nodes, edges };
 }
 
+/** Layout analysis nodes as sketch type with semantic-type-ordered stagger delays. */
+export function layoutAnalysisAsSketch(analysis: AnalysisResponse): {
+  nodes: Array<{
+    id: string;
+    type: "sketch";
+    position: { x: number; y: number };
+    data: {
+      label: string;
+      description: string;
+      nodeType: AnalysisNode["type"];
+      animationDelay: number;
+    };
+  }>;
+  edges: InsightEdge[];
+} {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
+
+  for (const node of analysis.nodes) {
+    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+  }
+  for (const edge of analysis.edges) {
+    g.setEdge(edge.source, edge.target);
+  }
+  dagre.layout(g);
+
+  // Group by type for staggered delays
+  const typeBaseDelay: Record<string, number> = {
+    problem: 0,
+    context: 1.2,
+    cause: 0.8,
+    solution: 1.6,
+  };
+  const typeCounters: Record<string, number> = {};
+
+  const nodes = analysis.nodes.map((node) => {
+    const pos = g.node(node.id);
+    const base = typeBaseDelay[node.type] ?? 0;
+    const count = typeCounters[node.type] ?? 0;
+    typeCounters[node.type] = count + 1;
+
+    return {
+      id: node.id,
+      type: "sketch" as const,
+      position: {
+        x: pos.x - NODE_WIDTH / 2,
+        y: pos.y - NODE_HEIGHT / 2,
+      },
+      data: {
+        label: node.label,
+        description: node.description,
+        nodeType: node.type,
+        animationDelay: base + count * 0.2,
+      },
+    };
+  });
+
+  const edges: InsightEdge[] = analysis.edges.map((edge, i) => ({
+    id: `edge_${i}`,
+    source: edge.source,
+    target: edge.target,
+    type: "sketch-edge",
+    label: edge.label,
+  }));
+
+  return { nodes, edges };
+}
+
 /** Incremental layout: positions only new nodes while preserving existing positions. */
 export function layoutNewNodes(
   existingNodes: InsightNode[],

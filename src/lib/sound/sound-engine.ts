@@ -169,6 +169,50 @@ export const soundEngine = {
     setTimeout(() => synth.dispose(), 250);
   },
 
+  // Input experience: singing bowl on reveal
+  playClarityChime() {
+    if (!isReady()) return;
+    const reverb = new Tone.Reverb({ decay: 3, wet: 0.6 }).toDestination();
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.3, decay: 1, sustain: 0.3, release: 2 },
+      volume: -12,
+    }).connect(reverb);
+    synth.triggerAttackRelease(["G4", "B4"], "1.5");
+    setTimeout(() => {
+      synth.dispose();
+      reverb.dispose();
+    }, 4000);
+  },
+
+  // Input experience: pencil scratch per sketch node
+  playPencilScratch() {
+    if (!isReady()) return;
+    const filter = new Tone.Filter(2000, "highpass").toDestination();
+    const noise = new Tone.NoiseSynth({
+      noise: { type: "white" },
+      envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.01 },
+      volume: -18,
+    }).connect(filter);
+    noise.triggerAttackRelease("50ms");
+    setTimeout(() => {
+      noise.dispose();
+      filter.dispose();
+    }, 200);
+  },
+
+  // Input experience: soft note when AI question appears
+  playClarificationAppear() {
+    if (!isReady()) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: "triangle" },
+      envelope: { attack: 0.01, decay: 0.08, sustain: 0, release: 0.02 },
+      volume: -10,
+    }).toDestination();
+    synth.triggerAttackRelease("E4", "80ms");
+    setTimeout(() => synth.dispose(), 200);
+  },
+
   // Spec 16: Ghost dismiss
   playGhostDismiss() {
     if (!isReady()) return;

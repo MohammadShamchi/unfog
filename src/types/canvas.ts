@@ -11,6 +11,20 @@ export interface InsightNodeData extends Record<string, unknown> {
 export type InsightNode = Node<InsightNodeData, "insight">;
 export type InsightEdge = Edge;
 
+export interface SketchNodeData extends Record<string, unknown> {
+  label: string;
+  description: string;
+  nodeType: NodeType;
+  animationDelay?: number;
+}
+
+export const SKETCH_COLORS: Record<NodeType, string> = {
+  problem: "#E07A5F",   // Warm terracotta
+  cause: "#7B8794",     // Muted slate
+  solution: "#5FE0C1",  // Teal
+  context: "#7B8794",   // Muted slate
+};
+
 export const NODE_COLORS: Record<NodeType, string> = {
   problem: "#E85D5D",   // Muted coral-red
   cause: "#F0A04B",     // Warmer amber

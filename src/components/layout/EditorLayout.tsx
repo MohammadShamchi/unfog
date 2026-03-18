@@ -11,6 +11,7 @@ import { SettingsModal } from "../ui/settings-modal";
 import { useSoundStore } from "@/stores/sound-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
+import { useInputExperienceStore } from "@/stores/input-experience-store";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
 import { useIsMobile } from "@/hooks/use-media-query";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -50,15 +51,29 @@ export function EditorLayout() {
 
   const nodes = useCanvasStore((s) => s.nodes);
   const isLoading = useCanvasStore((s) => s.isLoading);
-  const hasActiveMap = nodes.length > 0 || isLoading;
+  const inputPhase = useInputExperienceStore((s) => s.phase);
+  const isInputActive = inputPhase === "invitation" || inputPhase === "clarification";
+  const hasActiveMap = (nodes.length > 0 || isLoading) && !isInputActive;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">
-      <Header
-        isMobile={isMobile}
-        onTogglePrompt={() => setDrawerOpen((v) => !v)}
-        onOpenSettings={() => setShowSettings(true)}
-      />
+      <AnimatePresence>
+        {!isInputActive && (
+          <motion.div
+            key="header"
+            initial={{ y: -52, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -52, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Header
+              isMobile={isMobile}
+              onTogglePrompt={() => setDrawerOpen((v) => !v)}
+              onOpenSettings={() => setShowSettings(true)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="flex flex-1 overflow-hidden">
         <AnimatePresence>
           {!isMobile && hasActiveMap && (

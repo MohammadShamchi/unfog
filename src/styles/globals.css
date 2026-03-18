@@ -316,6 +316,35 @@
   --duration-breath: 800ms;
 }
 
+/* ========== INPUT EXPERIENCE ========== */
+@keyframes fog-drift-in {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translate(30px, 20px) scale(0.8); opacity: 0; }
+}
+
+@keyframes fog-drift-out {
+  0% { transform: translate(30px, 20px) scale(0.8); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translate(-30px, -20px) scale(1.2); opacity: 0; }
+}
+
+/* Sketch node colors */
+:root {
+  --sketch-problem: #E07A5F;
+  --sketch-solution: #5FE0C1;
+  --sketch-context: #7B8794;
+  --edge-sketch: #3A3A3A;
+  --input-text-color: #E0E0E0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fog-particle,
+  [class*="fog-drift"] {
+    animation: none !important;
+  }
+}
+
 /* ========== REACT FLOW OVERRIDES ========== */
 .react-flow__background {
   background-color: var(--bg-canvas) !important;

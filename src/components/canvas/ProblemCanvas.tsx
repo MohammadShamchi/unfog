@@ -18,24 +18,25 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { DotGridBackground } from "./DotGridBackground";
 import { ThinkingOverlay } from "./ThinkingOverlay";
-import { CenteredPromptOverlay } from "./CenteredPromptOverlay";
 import { SkeletonNodes } from "./SkeletonNodes";
-import { IntakeOverlay } from "./IntakeOverlay";
 import { GhostNode } from "./GhostNode";
 import { LabeledEdge } from "./LabeledEdge";
 import { nodeTypes as insightNodeTypes } from "./InsightNode";
+import { sketchNodeTypes } from "./SketchNode";
+import { sketchEdgeTypes } from "./SketchEdge";
+import { InputExperience } from "../input/InputExperience";
 import { useCanvasStore } from "@/stores/canvas-store";
-import { useIntakeStore } from "@/stores/intake-store";
 import { useGhostStore } from "@/stores/ghost-store";
 import { useFocusStore } from "@/stores/focus-store";
+import { useInputExperienceStore } from "@/stores/input-experience-store";
 import { useGhostSuggestions } from "@/hooks/use-ghost-suggestions";
 import { soundEngine } from "@/lib/sound/sound-engine";
 import { NODE_COLORS } from "@/types/canvas";
 import type { InsightNode as InsightNodeType } from "@/types/canvas";
 import type { NodeType } from "@/types/analysis";
 
-const nodeTypes = { ...insightNodeTypes, ghost: GhostNode };
-const edgeTypes = { smoothstep: LabeledEdge };
+const nodeTypes = { ...insightNodeTypes, ...sketchNodeTypes, ghost: GhostNode };
+const edgeTypes = { smoothstep: LabeledEdge, ...sketchEdgeTypes };
 
 function CanvasInner() {
   const { nodes: canvasNodes, edges, onNodesChange, onEdgesChange } = useCanvasStore();
@@ -45,8 +46,15 @@ function CanvasInner() {
   const setSelectedNodeId = useCanvasStore((s) => s.setSelectedNodeId);
   const { fitView, screenToFlowPosition } = useReactFlow();
 
-  const intakeStatus = useIntakeStore((s) => s.status);
-  const showIntake = intakeStatus === "assessing" || intakeStatus === "asking" || intakeStatus === "answering";
+  const inputPhase = useInputExperienceStore((s) => s.phase);
+  const showInputExperience = inputPhase !== "complete";
+
+  // Skip input experience if canvas already has nodes (returning user)
+  useEffect(() => {
+    if (canvasNodes.length > 0 && inputPhase !== "complete") {
+      useInputExperienceStore.getState().setPhase("complete");
+    }
+  }, [canvasNodes.length, inputPhase]);
 
   // Ghost nodes (Spec 16)
   const ghosts = useGhostStore((s) => s.ghosts);
@@ -219,8 +227,10 @@ function CanvasInner() {
         defaultEdgeOptions={defaultEdgeOpts}
       >
         <DotGridBackground />
-        <Controls position="bottom-right" showInteractive={false} />
-        {nodes.length >= 10 && (
+        {!showInputExperience && (
+          <Controls position="bottom-right" showInteractive={false} />
+        )}
+        {!showInputExperience && nodes.length >= 10 && (
           <MiniMap
             position="bottom-left"
             nodeColor={miniMapNodeColor}
@@ -252,9 +262,8 @@ function CanvasInner() {
         </button>
       )}
       <AnimatePresence mode="wait">
-        {showIntake && <IntakeOverlay key="intake" />}
-        {!showIntake && nodes.length === 0 && !isLoading && (
-          <CenteredPromptOverlay key="prompt" />
+        {showInputExperience && nodes.length === 0 && !isLoading && (
+          <InputExperience key="input-experience" />
         )}
         {isLoading && nodes.length === 0 && (
           <motion.div
@@ -269,8 +278,8 @@ function CanvasInner() {
         )}
       </AnimatePresence>
 
-      {/* Add node button — hidden when no map */}
-      {(nodes.length > 0 || isLoading) && (
+      {/* Add node button — hidden when no map or during input experience */}
+      {!showInputExperience && (nodes.length > 0 || isLoading) && (
         <button
           className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-all opacity-60 hover:opacity-100 hover:text-text-primary"
           style={{
