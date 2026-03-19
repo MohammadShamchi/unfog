@@ -257,8 +257,8 @@ export function NodeInspector() {
       {/* Divider */}
       <div className="mx-5" style={{ borderTop: "1px solid var(--border)" }} />
 
-      {/* Explore */}
-      <div className="px-5 py-3">
+      {/* Explore — shrink-0 so flex layout does not compress cards into each other */}
+      <div className="shrink-0 px-5 py-3">
         <button
           className="flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 font-display text-xs font-semibold transition-all disabled:opacity-50 hover:border-[var(--accent)] hover:text-[var(--accent)]"
           style={{
@@ -282,7 +282,7 @@ export function NodeInspector() {
       </div>
 
       {/* Focus toggle */}
-      <div className="px-5 pb-3">
+      <div className="shrink-0 px-5 pb-3 pt-4">
         <button
           className="flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 font-display text-xs font-semibold transition-all"
           style={{

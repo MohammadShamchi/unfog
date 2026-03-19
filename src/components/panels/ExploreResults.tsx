@@ -36,7 +36,7 @@ function SkeletonCard({ delay }: { delay: number }) {
 
 function OptionCard({
   option,
-  risk,
+  risk: _risk,
   index,
   onAddToMap,
   onDismiss,
@@ -51,7 +51,8 @@ function OptionCard({
 
   return (
     <motion.div
-      className="relative rounded-lg overflow-hidden"
+      layout={false}
+      className="relative w-full shrink-0 rounded-lg overflow-hidden"
       style={{
         backgroundColor: "var(--bg-elevated)",
         border: "1px solid var(--border)",
@@ -135,30 +136,39 @@ export function ExploreResults({ results, isLoading, onAddToMap, onDismiss }: Ex
   if (!isLoading && positiveOptions.length === 0) return null;
 
   return (
-    <div className="mt-2.5 max-h-[400px] overflow-y-auto flex flex-col gap-2.5">
-      <AnimatePresence mode="popLayout">
-        {isLoading && !results && (
-          <>
-            <SkeletonCard key="skel-0" delay={0} />
-            <SkeletonCard key="skel-1" delay={0.08} />
-          </>
-        )}
-        {positiveOptions.map((option, i) => {
-          const risk = results?.options.find(
-            (o) => o.sentiment === "negative" && o.parentOptionId === option.id
-          );
-          return (
-            <OptionCard
-              key={option.id}
-              option={option}
-              risk={risk}
-              index={i}
-              onAddToMap={onAddToMap}
-              onDismiss={onDismiss}
-            />
-          );
-        })}
-      </AnimatePresence>
+    <div className="mt-3 max-h-[min(400px,50vh)] min-h-0 w-full overflow-x-hidden overflow-y-auto pb-1">
+      <div className="flex flex-col gap-3">
+        <AnimatePresence initial={false} mode="sync">
+          {isLoading && !results && (
+            <motion.div
+              key="explore-loading"
+              className="flex flex-col gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <SkeletonCard delay={0} />
+              <SkeletonCard delay={0.08} />
+            </motion.div>
+          )}
+          {positiveOptions.map((option, i) => {
+            const risk = results?.options.find(
+              (o) => o.sentiment === "negative" && o.parentOptionId === option.id
+            );
+            return (
+              <OptionCard
+                key={option.id}
+                option={option}
+                risk={risk}
+                index={i}
+                onAddToMap={onAddToMap}
+                onDismiss={onDismiss}
+              />
+            );
+          })}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
