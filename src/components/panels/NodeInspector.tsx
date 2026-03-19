@@ -34,30 +34,18 @@ export function NodeInspector() {
   }, [selectedNodeId]);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
-  if (!node || !selectedNodeId) return null;
-
-  const handleLabelCommit = (newLabel: string) => {
-    useCanvasStore.getState().updateNodeData(selectedNodeId, { label: newLabel });
-  };
-
-  const handleDescriptionCommit = (newDesc: string) => {
-    useCanvasStore.getState().updateNodeData(selectedNodeId, { description: newDesc });
-  };
-
-  const handleTypeChange = (newType: NodeType) => {
-    useCanvasStore.getState().changeNodeType(selectedNodeId, newType);
-    soundEngine.playTypeChange();
-  };
 
   const handleExplore = useCallback(async () => {
-    if (isExploring) return;
+    if (isExploring || !selectedNodeId) return;
 
-    // Check cache first
+    // Check cache first (does not require `node` in the current render)
     const cached = exploreCache.current.get(selectedNodeId);
     if (cached) {
       setExploreResults(cached);
       return;
     }
+
+    if (!node) return;
 
     setIsExploring(true);
     soundEngine.playAiStart();
@@ -105,7 +93,7 @@ export function NodeInspector() {
   }, [isExploring, selectedNodeId, nodes, edges, node, originalPrompt]);
 
   const handleAddToMap = useCallback((optionId: string) => {
-    if (!exploreResults) return;
+    if (!exploreResults || !selectedNodeId) return;
 
     const option = exploreResults.options.find((o) => o.id === optionId);
     if (!option) return;
@@ -163,7 +151,7 @@ export function NodeInspector() {
   }, [exploreResults, selectedNodeId]);
 
   const handleDismissOption = useCallback((optionId: string) => {
-    if (!exploreResults) return;
+    if (!exploreResults || !selectedNodeId) return;
 
     const removeIds = new Set([optionId]);
     exploreResults.options
@@ -181,6 +169,21 @@ export function NodeInspector() {
       return newOptions.some((o) => o.sentiment === "positive") ? updated : null;
     });
   }, [exploreResults, selectedNodeId]);
+
+  if (!node || !selectedNodeId) return null;
+
+  const handleLabelCommit = (newLabel: string) => {
+    useCanvasStore.getState().updateNodeData(selectedNodeId, { label: newLabel });
+  };
+
+  const handleDescriptionCommit = (newDesc: string) => {
+    useCanvasStore.getState().updateNodeData(selectedNodeId, { description: newDesc });
+  };
+
+  const handleTypeChange = (newType: NodeType) => {
+    useCanvasStore.getState().changeNodeType(selectedNodeId, newType);
+    soundEngine.playTypeChange();
+  };
 
   const handleDelete = () => {
     const result = useCanvasStore.getState().deleteNode(selectedNodeId);
