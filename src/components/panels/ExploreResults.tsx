@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, AlertTriangle, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { NODE_BADGE_STYLES, NODE_TYPE_LABELS } from "@/types/canvas";
 import type { OptionsResponse, OptionNode } from "@/types/analysis";
 
@@ -48,9 +48,6 @@ function OptionCard({
   onDismiss: (id: string) => void;
 }) {
   const badge = NODE_BADGE_STYLES[option.type];
-  const pros = option.pros ?? [];
-  const cons = option.cons ?? [];
-  const hasProsOrCons = pros.length > 0 || cons.length > 0;
 
   return (
     <motion.div
@@ -96,60 +93,6 @@ function OptionCard({
         <p dir="auto" className="mt-1 font-body text-xs text-text-secondary leading-relaxed">
           {option.description}
         </p>
-
-        {/* Pros & Cons */}
-        {hasProsOrCons && (
-          <div className="mt-2.5 flex flex-col gap-1.5">
-            {/* Pros */}
-            {pros.length > 0 && (
-              <div className="flex flex-col gap-1">
-                {pros.map((pro, i) => (
-                  <div key={i} className="flex items-start gap-1.5">
-                    <Check size={11} className="mt-[3px] shrink-0" style={{ color: "var(--accent)" }} />
-                    <span dir="auto" className="font-body text-[11px] leading-snug" style={{ color: "var(--accent)" }}>
-                      {pro}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Cons */}
-            {cons.length > 0 && (
-              <div className="flex flex-col gap-1">
-                {cons.map((con, i) => (
-                  <div key={i} className="flex items-start gap-1.5">
-                    <AlertTriangle size={11} className="mt-[3px] shrink-0" style={{ color: "rgba(248, 113, 113, 0.8)" }} />
-                    <span dir="auto" className="font-body text-[11px] leading-snug" style={{ color: "rgba(248, 113, 113, 0.7)" }}>
-                      {con}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Fallback: show risk node if no pros/cons arrays (backward compat) */}
-        {!hasProsOrCons && risk && (
-          <>
-            <div
-              className="my-2.5 border-t"
-              style={{ borderStyle: "dashed", borderColor: "var(--border)" }}
-            />
-            <div className="flex items-start gap-1.5">
-              <AlertTriangle size={12} className="mt-0.5 shrink-0" style={{ color: "rgba(239, 68, 68, 0.7)" }} />
-              <div>
-                <p dir="auto" className="font-display text-xs font-semibold" style={{ color: "rgba(248, 113, 113, 0.8)" }}>
-                  {risk.label}
-                </p>
-                <p dir="auto" className="mt-0.5 font-body text-[11px] leading-relaxed" style={{ color: "rgba(248, 113, 113, 0.6)" }}>
-                  {risk.description}
-                </p>
-              </div>
-            </div>
-          </>
-        )}
 
         {/* Actions */}
         <div className="mt-2.5 flex items-center gap-2">
