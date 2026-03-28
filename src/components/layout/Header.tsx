@@ -9,6 +9,7 @@ import { useSoundStore } from "@/stores/sound-store";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useIntakeStore } from "@/stores/intake-store";
 import { useFocusStore } from "@/stores/focus-store";
+import { useInputExperienceStore } from "@/stores/input-experience-store";
 import { exportCanvas, importCanvas, downloadAsJSON } from "@/lib/export/canvas-export";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
@@ -40,6 +41,7 @@ export function Header({ isMobile, onTogglePrompt, onOpenSettings }: HeaderProps
     }
     useCanvasStore.getState().resetCanvas();
     useIntakeStore.getState().reset();
+    useInputExperienceStore.getState().reset();
   }
 
   function handleExport() {

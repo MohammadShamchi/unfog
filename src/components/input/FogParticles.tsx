@@ -47,7 +47,7 @@ export function FogParticles({ active, direction }: FogParticlesProps) {
               width: size,
               height: size,
               borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(95,224,193,${opacity}) 0%, transparent 70%)`,
+              background: `radial-gradient(circle, color-mix(in srgb, var(--accent) ${Math.round(opacity * 100)}%, transparent) 0%, transparent 70%)`,
               animation: `${animationName} ${4 + (i % 3)}s ${delay}s ease-in-out infinite`,
             }}
           />

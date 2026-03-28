@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type InputPhase = "invitation" | "clarification" | "reveal" | "complete";
+export type InputPhase = "invitation" | "clarification" | "reveal" | "manual" | "complete";
 
 interface ConversationMessage {
   role: "user" | "assistant";
@@ -25,6 +25,7 @@ interface InputExperienceState {
   setTypedCharIndex: (i: number) => void;
   setFogDirection: (dir: "inward" | "outward" | "none") => void;
   setRevealNodeCount: (n: number) => void;
+  startManualCanvas: () => void;
   reset: () => void;
 }
 
@@ -51,5 +52,10 @@ export const useInputExperienceStore = create<InputExperienceState>((set) => ({
   setTypedCharIndex: (typedCharIndex) => set({ typedCharIndex }),
   setFogDirection: (fogDirection) => set({ fogDirection }),
   setRevealNodeCount: (revealNodeCount) => set({ revealNodeCount }),
+  startManualCanvas: () =>
+    set({
+      ...initialState,
+      phase: "manual",
+    }),
   reset: () => set(initialState),
 }));

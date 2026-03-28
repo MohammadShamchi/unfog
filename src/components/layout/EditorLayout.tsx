@@ -40,7 +40,13 @@ export function EditorLayout() {
   // Auto-close mobile drawer when intake starts
   const isInIntake = useIntakeStore((s) => s.isInIntake());
   useEffect(() => {
-    if (isInIntake && isMobile) setDrawerOpen(false);
+    if (!isInIntake || !isMobile) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      setDrawerOpen(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [isInIntake, isMobile]);
 
   // Sound effects hook

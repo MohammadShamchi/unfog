@@ -39,7 +39,10 @@ export function InputExperience() {
   return (
     <motion.div
       className="absolute inset-0 z-30"
-      style={{ backgroundColor: "#0B0D10" }}
+      style={{
+        background:
+          "radial-gradient(circle at top, var(--accent-muted) 0%, transparent 34%), var(--bg-canvas)",
+      }}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
@@ -57,7 +60,7 @@ export function InputExperience() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <InvitationPhase />
+            <InvitationPhase onStartAi={() => void handleSubmitShortcut()} />
           </motion.div>
         )}
 

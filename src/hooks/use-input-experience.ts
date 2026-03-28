@@ -7,23 +7,17 @@ import { useHistoryStore } from "@/stores/history-store";
 import { apiPostWithRetry } from "@/lib/api-client";
 import { soundEngine } from "@/lib/sound/sound-engine";
 
-const PAUSE_THRESHOLD_MS = 3000;
-const MIN_CHARS_FOR_PAUSE = 80;
 const MAX_QUESTIONS = 3;
 const TYPING_SPEED_MS = 30;
+const REVEAL_ACK_DELAY_MS = 420;
 
 export function useInputExperience() {
-  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const questionCountRef = useRef(0);
   const typingFrameRef = useRef<number | null>(null);
-
-  const phase = useInputExperienceStore((s) => s.phase);
-  const userText = useInputExperienceStore((s) => s.userText);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       if (typingFrameRef.current) cancelAnimationFrame(typingFrameRef.current);
     };
   }, []);
@@ -80,10 +74,13 @@ export function useInputExperience() {
       await typeMessage(data.data.question);
 
       // Add completed AI message to conversation
-      useInputExperienceStore.getState().addMessage({
+      const clarifiedStore = useInputExperienceStore.getState();
+      clarifiedStore.addMessage({
         role: "assistant",
         content: data.data.question,
       });
+      clarifiedStore.setCurrentAiMessage("");
+      clarifiedStore.setTypedCharIndex(0);
 
       questionCountRef.current++;
       return false;
@@ -91,37 +88,6 @@ export function useInputExperience() {
       return true; // on error, skip to analyze
     }
   }, [typeMessage]);
-
-  // Transition to clarification phase
-  const startClarification = useCallback(async () => {
-    const store = useInputExperienceStore.getState();
-    if (store.phase !== "invitation") return;
-
-    store.setPhase("clarification");
-    store.setFogDirection("inward");
-    questionCountRef.current = 0;
-
-    const ready = await askClarification();
-    if (ready) {
-      triggerReveal();
-    }
-  }, [askClarification]);
-
-  // Handle user answer during clarification
-  const handleAnswer = useCallback(async (answer: string) => {
-    const store = useInputExperienceStore.getState();
-    store.addMessage({ role: "user", content: answer });
-
-    if (questionCountRef.current >= MAX_QUESTIONS) {
-      triggerReveal();
-      return;
-    }
-
-    const ready = await askClarification();
-    if (ready || questionCountRef.current >= MAX_QUESTIONS) {
-      triggerReveal();
-    }
-  }, [askClarification]);
 
   // Build enriched prompt from conversation
   const buildPrompt = useCallback((): string => {
@@ -184,21 +150,49 @@ export function useInputExperience() {
     useInputExperienceStore.getState().setFogDirection("none");
   }, [buildPrompt]);
 
-  // Pause detection — watch for typing pauses
-  const handleTextChange = useCallback((text: string) => {
-    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+  const transitionToReveal = useCallback(async (message: string) => {
+    const store = useInputExperienceStore.getState();
 
-    if (text.length >= MIN_CHARS_FOR_PAUSE && phase === "invitation") {
-      pauseTimerRef.current = setTimeout(() => {
-        startClarification();
-      }, PAUSE_THRESHOLD_MS);
+    await typeMessage(message);
+    store.addMessage({ role: "assistant", content: message });
+    store.setCurrentAiMessage("");
+    store.setTypedCharIndex(0);
+
+    await new Promise((resolve) => setTimeout(resolve, REVEAL_ACK_DELAY_MS));
+    await triggerReveal();
+  }, [typeMessage, triggerReveal]);
+
+  // Transition to clarification phase
+  const startClarification = useCallback(async () => {
+    const store = useInputExperienceStore.getState();
+    if (store.phase !== "invitation") return;
+    if (!store.userText.trim()) return;
+
+    store.setPhase("clarification");
+    store.setFogDirection("inward");
+    questionCountRef.current = 0;
+
+    const ready = await askClarification();
+    if (ready) {
+      await transitionToReveal("I have enough context. Let me turn this into a clarity map.");
     }
-  }, [phase, startClarification]);
+  }, [askClarification, transitionToReveal]);
 
-  // Watch userText changes for pause detection
-  useEffect(() => {
-    handleTextChange(userText);
-  }, [userText, handleTextChange]);
+  // Handle user answer during clarification
+  const handleAnswer = useCallback(async (answer: string) => {
+    const store = useInputExperienceStore.getState();
+    store.addMessage({ role: "user", content: answer });
+
+    if (questionCountRef.current >= MAX_QUESTIONS) {
+      await transitionToReveal("Got it. I have enough now, and I’m factoring that in before I map this out.");
+      return;
+    }
+
+    const ready = await askClarification();
+    if (ready || questionCountRef.current >= MAX_QUESTIONS) {
+      await transitionToReveal("Got it. I’m factoring that in before I map this out.");
+    }
+  }, [askClarification, transitionToReveal]);
 
   // Cmd/Ctrl+Enter handler
   const handleSubmitShortcut = useCallback(() => {
@@ -211,6 +205,7 @@ export function useInputExperience() {
   return {
     handleAnswer,
     handleSubmitShortcut,
+    startClarification,
     triggerReveal,
   };
 }

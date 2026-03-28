@@ -28,6 +28,7 @@ import { SketchyEdge } from "./edges/SketchyEdge";
 import { sketchNodeTypes } from "./SketchNode";
 import { sketchEdgeTypes } from "./SketchEdge";
 import { InputExperience } from "../input/InputExperience";
+import { EmptyState } from "./EmptyState";
 import { useCanvasStore } from "@/stores/canvas-store";
 import { useGhostStore } from "@/stores/ghost-store";
 import { useFocusStore } from "@/stores/focus-store";
@@ -58,11 +59,13 @@ function CanvasInner() {
   const { fitView, screenToFlowPosition } = useReactFlow();
 
   const inputPhase = useInputExperienceStore((s) => s.phase);
-  const showInputExperience = inputPhase !== "complete";
+  const showInputExperience =
+    inputPhase === "invitation" || inputPhase === "clarification" || inputPhase === "reveal";
+  const isManualEntry = inputPhase === "manual";
 
   // Skip input experience if canvas already has nodes (returning user)
   useEffect(() => {
-    if (canvasNodes.length > 0 && inputPhase !== "complete") {
+    if (canvasNodes.length > 0 && inputPhase !== "complete" && inputPhase !== "manual") {
       useInputExperienceStore.getState().setPhase("complete");
     }
   }, [canvasNodes.length, inputPhase]);
@@ -189,6 +192,16 @@ function CanvasInner() {
     soundEngine.playNodeCreate();
   }, [screenToFlowPosition]);
 
+  const restartGuidedEntry = useCallback(() => {
+    useCanvasStore.getState().resetCanvas();
+    useInputExperienceStore.getState().reset();
+  }, []);
+
+  const startManualEntry = useCallback(() => {
+    useCanvasStore.getState().resetCanvas();
+    useInputExperienceStore.getState().startManualCanvas();
+  }, []);
+
   const defaultEdgeOpts = useMemo(
     () => ({
       type: "smoothstep" as const,
@@ -258,6 +271,14 @@ function CanvasInner() {
 
       <ThinkingOverlay />
 
+      {!showInputExperience && !isLoading && nodes.length === 0 && (
+        <EmptyState
+          variant={isManualEntry ? "manual" : "guided"}
+          onPrimaryAction={isManualEntry ? handleAddNode : restartGuidedEntry}
+          onSecondaryAction={isManualEntry ? restartGuidedEntry : startManualEntry}
+        />
+      )}
+
       {/* Spec 17: Focus exit pill */}
       {focusedNodeId && (
         <button
@@ -290,7 +311,7 @@ function CanvasInner() {
       </AnimatePresence>
 
       {/* Add node button — hidden when no map or during input experience */}
-      {!showInputExperience && (nodes.length > 0 || isLoading) && (
+      {!showInputExperience && (nodes.length > 0 || isLoading || isManualEntry) && (
         <button
           className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-display text-xs transition-all opacity-60 hover:opacity-100 hover:text-text-primary"
           style={{
@@ -301,7 +322,7 @@ function CanvasInner() {
           onClick={handleAddNode}
         >
           <Plus size={14} />
-          Add node
+          {nodes.length === 0 ? "Add first node" : "Add node"}
         </button>
       )}
     </div>

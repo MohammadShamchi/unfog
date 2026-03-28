@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight, CornerDownLeft } from "lucide-react";
 import { useInputExperienceStore } from "@/stores/input-experience-store";
 
 interface ClarificationPhaseProps {
@@ -35,7 +36,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleAnswerSubmit();
       }
@@ -64,7 +65,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
               fontFamily: "var(--font-body)",
               fontSize: 16,
               lineHeight: 1.7,
-              color: "rgba(224, 224, 224, 0.5)",
+              color: "var(--text-secondary)",
             }}
           >
             {userText}
@@ -78,7 +79,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
           transition={{ duration: 0.6, ease: "easeOut" }}
           style={{
             height: 1,
-            backgroundColor: "#5FE0C1",
+            backgroundColor: "var(--accent)",
             margin: "0 auto",
             opacity: 0.6,
           }}
@@ -101,7 +102,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
-                    backgroundColor: "#5FE0C1",
+                    backgroundColor: "var(--accent)",
                   }}
                 />
               )}
@@ -110,7 +111,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
                   fontFamily: msg.role === "assistant" ? "var(--font-display)" : "var(--font-body)",
                   fontSize: msg.role === "assistant" ? 16 : 15,
                   lineHeight: 1.6,
-                  color: msg.role === "assistant" ? "#A0A0A0" : "#E0E0E0",
+                  color: msg.role === "assistant" ? "var(--text-secondary)" : "var(--text-primary)",
                 }}
               >
                 {msg.content}
@@ -131,7 +132,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  backgroundColor: "#5FE0C1",
+                  backgroundColor: "var(--accent)",
                 }}
               />
               <p
@@ -139,7 +140,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
                   fontFamily: "var(--font-display)",
                   fontSize: 16,
                   lineHeight: 1.6,
-                  color: "#A0A0A0",
+                  color: "var(--text-secondary)",
                 }}
               >
                 {displayedAiText}
@@ -157,27 +158,53 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
+              className="rounded-[20px] border px-4 py-3"
+              style={{
+                borderColor: "color-mix(in srgb, var(--accent) 16%, var(--border))",
+                backgroundColor: "color-mix(in srgb, var(--bg-elevated) 88%, transparent)",
+              }}
             >
               <textarea
                 ref={answerRef}
                 value={answerText}
                 onChange={(e) => setAnswerText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                rows={1}
+                rows={2}
                 spellCheck={false}
-                placeholder="Your answer..."
+                placeholder="Answer in your own words..."
                 className="w-full resize-none bg-transparent outline-none"
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 15,
                   lineHeight: 1.6,
-                  color: "#E0E0E0",
-                  caretColor: "#5FE0C1",
+                  color: "var(--text-primary)",
+                  caretColor: "var(--accent)",
                   border: "none",
                   padding: 0,
-                  minHeight: "1.6em",
+                  minHeight: "3.2em",
                 }}
               />
+
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                  <CornerDownLeft size={12} />
+                  <span>Enter sends. Shift + Enter adds a new line.</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAnswerSubmit}
+                  disabled={!answerText.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-xs font-semibold transition-all disabled:opacity-50"
+                  style={{
+                    backgroundColor: "var(--accent)",
+                    color: "var(--bg-canvas)",
+                  }}
+                >
+                  Send
+                  <ArrowUpRight size={13} />
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -192,7 +219,7 @@ export function ClarificationPhase({ onAnswer, showSummary }: ClarificationPhase
               style={{
                 fontFamily: "var(--font-display)",
                 fontSize: 16,
-                color: "#5FE0C1",
+                color: "var(--accent)",
                 marginTop: 8,
               }}
             >

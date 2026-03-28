@@ -20,10 +20,10 @@ export function RevealOverlay() {
         style={{
           fontFamily: "var(--font-display)",
           fontSize: 16,
-          color: "#5FE0C1",
+          color: "var(--accent)",
         }}
       >
-        okay — let me show you what I&apos;m seeing
+        building your first clarity map
       </motion.p>
     </motion.div>
   );

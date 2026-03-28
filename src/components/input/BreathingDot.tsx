@@ -33,7 +33,7 @@ export function BreathingDot({ visible }: BreathingDotProps) {
         width: 8,
         height: 8,
         borderRadius: "50%",
-        backgroundColor: "#5FE0C1",
+        backgroundColor: "var(--accent)",
         flexShrink: 0,
       }}
     />
